@@ -11,6 +11,7 @@ const CFG = {
 const ADMIN_EMAIL = "vinitakatkar33@gmail.com";
 const IS_CONFIGURED = !CFG.SUPABASE_URL.includes("YOUR_PROJECT_REF");
 const MAP_URL = "https://share.google/jeiOPhAlfrJ03W9jr";
+const WHATSAPP_URL = "https://chat.whatsapp.com/BjX1hFJkXJJ573Nc64oCUt?mode=gi_t";
 
 let _token = null;
 
@@ -79,7 +80,7 @@ const GLOBAL_CSS = `
   :root {
     --maroon: #6B1E26; --maroon-dark: #3E0C13; --gold: #C4952A; --gold-light: #E8BE60;
     --cream: #FBF5E8; --cream-dark: #F0E4CC; --text: #1C0A05; --text-muted: #7A5540;
-    --green: #2D7A4F; --red: #C0392B;
+    --green: #2D7A4F; --red: #C0392B; --wa: #25D366;
     --shadow: 0 4px 24px rgba(60,10,20,0.10); --shadow-lg: 0 12px 48px rgba(60,10,20,0.18);
     --radius: 10px;
   }
@@ -121,7 +122,6 @@ const GLOBAL_CSS = `
   .section-hd { text-align: center; padding: 2.5rem 2rem 1.5rem; }
   .section-hd h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; color: var(--maroon); }
   .section-hd p { color: var(--text-muted); font-size: .82rem; margin-top: .3rem; }
-
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; padding: 0 2rem 3rem; max-width: 1400px; margin: 0 auto; }
   .card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s; display: flex; flex-direction: column; }
   .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
@@ -136,8 +136,6 @@ const GLOBAL_CSS = `
   .badge { display: inline-block; padding: .18rem .58rem; border-radius: 20px; font-size: .7rem; font-weight: 500; letter-spacing: .04em; }
   .badge-avail { background: #E8F5EE; color: var(--green); border: 1px solid #C8E6D4; }
   .badge-sold  { background: #FDEEEC; color: var(--red); border: 1px solid #F5C8C2; }
-
-  /* ENQUIRE BUTTON */
   .btn-enquire { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: .2rem .7rem; border-radius: 20px; font-size: .7rem; font-weight: 500; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
   .btn-enquire:hover { background: var(--gold); color: #fff; }
 
@@ -199,25 +197,30 @@ const GLOBAL_CSS = `
   .confirm h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; margin-bottom: .4rem; }
   .confirm p { color: var(--text-muted); font-size: .88rem; margin-bottom: 1.5rem; }
 
-  /* CONTACT US SECTION */
+  /* CONTACT SECTION */
   .contact-section { background: var(--maroon-dark); padding: 3.5rem 2rem; }
-  .contact-section-inner { max-width: 900px; margin: 0 auto; }
+  .contact-section-inner { max-width: 1100px; margin: 0 auto; }
   .contact-section-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: var(--gold-light); text-align: center; letter-spacing: .06em; }
   .contact-section-line { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: .8rem auto 2rem; }
-  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; }
+  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; }
   .contact-card { background: rgba(255,255,255,.06); border: 1px solid rgba(196,149,42,.25); border-radius: 12px; padding: 1.5rem 1.2rem; text-align: center; transition: background .2s; }
   .contact-card:hover { background: rgba(255,255,255,.1); }
   .contact-card-icon { font-size: 1.8rem; margin-bottom: .6rem; }
   .contact-card-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .18em; color: var(--gold); font-weight: 500; margin-bottom: .5rem; }
-  .contact-card-value { font-size: .92rem; color: rgba(255,255,255,.85); line-height: 1.5; }
+  .contact-card-value { font-size: .88rem; color: rgba(255,255,255,.85); line-height: 1.6; }
   .contact-card-value a { color: var(--gold-light); text-decoration: none; }
   .contact-card-value a:hover { text-decoration: underline; }
-  .btn-map { display: inline-block; margin-top: .6rem; background: var(--green); color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-map { display: inline-block; margin-top: .6rem; background: var(--green); color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; }
   .btn-map:hover { background: #235f3d; }
+  .btn-wa { display: inline-block; margin-top: .6rem; background: #25D366; color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; }
+  .btn-wa:hover { background: #1da851; }
 
   /* FOOTER */
   .footer { text-align: center; padding: 1.5rem; background: #2A0910; color: rgba(255,255,255,.3); font-size: .73rem; letter-spacing: .06em; }
 
+  @media (max-width: 768px) {
+    .contact-cards { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 640px) {
     .hero h1 { font-size: 1.8rem; }
     .grid { padding: 0 1rem 2rem; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
@@ -238,6 +241,8 @@ function ContactSection() {
         <h2 className="contact-section-title">Contact Us</h2>
         <div className="contact-section-line" />
         <div className="contact-cards">
+
+          {/* Phone */}
           <div className="contact-card">
             <div className="contact-card-icon">📞</div>
             <div className="contact-card-label">Phone</div>
@@ -245,6 +250,8 @@ function ContactSection() {
               <a href="tel:9881679579">9881679579</a>
             </div>
           </div>
+
+          {/* Email */}
           <div className="contact-card">
             <div className="contact-card-icon">✉️</div>
             <div className="contact-card-label">Email</div>
@@ -252,29 +259,55 @@ function ContactSection() {
               <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
             </div>
           </div>
+
+          {/* Primary Address */}
           <div className="contact-card">
             <div className="contact-card-icon">🏠</div>
             <div className="contact-card-label">Address</div>
             <div className="contact-card-value">
-              HV9H+56R, Tank Rd, Shanti Nagar,<br />
-              Vishrantwadi, Pune,<br />
-              Maharashtra 411006
+              HV9H+56R, Tank Rd,<br />
+              Shanti Nagar, Vishrantwadi,<br />
+              Pune, Maharashtra 411006
             </div>
           </div>
+
+          {/* Map */}
           <div className="contact-card">
             <div className="contact-card-icon">📍</div>
             <div className="contact-card-label">Location</div>
             <div className="contact-card-value">
-              <a
-                className="btn-map"
-                href={MAP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a className="btn-map" href={MAP_URL} target="_blank" rel="noopener noreferrer">
                 View on Map
               </a>
             </div>
           </div>
+
+          {/* WhatsApp Group */}
+          <div className="contact-card">
+            <div className="contact-card-icon">💬</div>
+            <div className="contact-card-label">WhatsApp Group</div>
+            <div className="contact-card-value">
+              Join our group for<br />latest updates & offers
+              <br />
+              <a className="btn-wa" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                Join Group
+              </a>
+            </div>
+          </div>
+
+          {/* Alternate Address */}
+          <div className="contact-card">
+            <div className="contact-card-icon">🏢</div>
+            <div className="contact-card-label">Alternate Address</div>
+            <div className="contact-card-value">
+              Sr No 11/1, DN Parande Park Marg,<br />
+              Dhanori, Pune, Maharashtra 411015<br />
+              <span style={{ fontSize: ".78rem", color: "rgba(232,190,96,.7)", marginTop: ".3rem", display: "block" }}>
+                Gini Belvista — A701
+              </span>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -282,7 +315,7 @@ function ContactSection() {
 }
 
 // ════════════════════════════════════════════════════════════
-//  ENQUIRE MODAL (shown when clicking Enquire button)
+//  ENQUIRE MODAL
 // ════════════════════════════════════════════════════════════
 function EnquireModal({ productName, onClose }) {
   return (
@@ -290,51 +323,45 @@ function EnquireModal({ productName, onClose }) {
       <div className="contact-modal">
         <div style={{ fontSize: "2rem", marginBottom: ".5rem" }}>🛍️</div>
         <div className="contact-modal-title">Interested in this saree?</div>
-        <div className="contact-modal-sub">
-          Please contact us using the below contact details
-        </div>
+        <div className="contact-modal-sub">Please contact us using the below contact details</div>
         <div className="contact-modal-grid">
           <div className="contact-item">
             <div className="contact-item-icon">📞</div>
             <div>
               <div className="contact-item-label">Phone</div>
-              <div className="contact-item-value">
-                <a href="tel:9881679579">9881679579</a>
-              </div>
+              <div className="contact-item-value"><a href="tel:9881679579">9881679579</a></div>
             </div>
           </div>
           <div className="contact-item">
             <div className="contact-item-icon">✉️</div>
             <div>
               <div className="contact-item-label">Email</div>
-              <div className="contact-item-value">
-                <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
-              </div>
+              <div className="contact-item-value"><a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a></div>
             </div>
           </div>
           <div className="contact-item">
             <div className="contact-item-icon">🏠</div>
             <div>
               <div className="contact-item-label">Address</div>
-              <div className="contact-item-value">
-                HV9H+56R, Tank Rd, Shanti Nagar,<br />
-                Vishrantwadi, Pune, Maharashtra 411006
-              </div>
+              <div className="contact-item-value">HV9H+56R, Tank Rd, Shanti Nagar,<br />Vishrantwadi, Pune, Maharashtra 411006</div>
             </div>
           </div>
           <div className="contact-item">
             <div className="contact-item-icon">📍</div>
             <div>
               <div className="contact-item-label">Location</div>
-              <div className="contact-item-value">
-                <a href={MAP_URL} target="_blank" rel="noopener noreferrer">View on Map ↗</a>
-              </div>
+              <div className="contact-item-value"><a href={MAP_URL} target="_blank" rel="noopener noreferrer">View on Map ↗</a></div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">💬</div>
+            <div>
+              <div className="contact-item-label">WhatsApp Group</div>
+              <div className="contact-item-value"><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join our WhatsApp Group ↗</a></div>
             </div>
           </div>
         </div>
-        <button className="btn btn-primary" style={{ width: "100%" }} onClick={onClose}>
-          Close
-        </button>
+        <button className="btn btn-primary" style={{ width: "100%" }} onClick={onClose}>Close</button>
       </div>
     </div>
   );
@@ -356,18 +383,12 @@ function ProductCard({ p }) {
           <div className="card-name">{p.name}</div>
           <div className="card-price">₹{Number(p.price).toLocaleString("en-IN")}</div>
           <div className="card-row">
-            <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>
-              {p.status}
-            </span>
-            <button className="btn-enquire" onClick={() => setShowEnquire(true)}>
-              Enquire
-            </button>
+            <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>{p.status}</span>
+            <button className="btn-enquire" onClick={() => setShowEnquire(true)}>Enquire</button>
           </div>
         </div>
       </div>
-      {showEnquire && (
-        <EnquireModal productName={p.name} onClose={() => setShowEnquire(false)} />
-      )}
+      {showEnquire && <EnquireModal productName={p.name} onClose={() => setShowEnquire(false)} />}
     </>
   );
 }
@@ -447,9 +468,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
-          <button className="btn btn-primary" onClick={save} disabled={saving}>
-            {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Product"}
-          </button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Product"}</button>
         </div>
       </div>
     </div>
@@ -529,30 +548,18 @@ function AdminPanel({ onLogout, onViewCatalog }) {
   const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await API.list();
-      setProducts(data || []);
-    } catch (e) {
-      setError("Failed to load products: " + e.message);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setError("");
+    try { const data = await API.list(); setProducts(data || []); }
+    catch (e) { setError("Failed to load products: " + e.message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
-    try {
-      await API.remove(deleteTarget.id);
-      setDeleteTarget(null);
-      load();
-    } catch (e) {
-      setError("Delete failed: " + e.message);
-      setDeleting(false);
-    }
+    try { await API.remove(deleteTarget.id); setDeleteTarget(null); load(); }
+    catch (e) { setError("Delete failed: " + e.message); setDeleting(false); }
   };
 
   const openAdd = () => { setEditProduct(null); setShowForm(true); };
@@ -583,11 +590,7 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           </div>
         ) : (
           <table>
-            <thead>
-              <tr>
-                <th>Image</th><th>Product Name</th><th>Price</th><th>Status</th><th>Actions</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Image</th><th>Product Name</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {products.map(p => (
                 <tr key={p.id}>
@@ -625,9 +628,7 @@ function CatalogView({ products, loading, error }) {
       </div>
       <div className="section-hd">
         <h2>Our Collection</h2>
-        {!loading && !error && (
-          <p>{products.length} exquisite saree{products.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe</p>
-        )}
+        {!loading && !error && <p>{products.length} exquisite saree{products.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe</p>}
       </div>
       {loading ? (
         <div className="loading"><div className="spinner" /><span>Loading collection…</span></div>
@@ -638,14 +639,9 @@ function CatalogView({ products, loading, error }) {
           <p style={{ fontSize: ".82rem", color: "var(--text-muted)" }}>{error}</p>
         </div>
       ) : products.length === 0 ? (
-        <div className="empty-state">
-          <div style={{ fontSize: "2.5rem" }}>🪡</div>
-          <p>No products yet — check back soon!</p>
-        </div>
+        <div className="empty-state"><div style={{ fontSize: "2.5rem" }}>🪡</div><p>No products yet — check back soon!</p></div>
       ) : (
-        <div className="grid">
-          {products.map(p => <ProductCard key={p.id} p={p} />)}
-        </div>
+        <div className="grid">{products.map(p => <ProductCard key={p.id} p={p} />)}</div>
       )}
     </>
   );
@@ -671,16 +667,10 @@ export default function App() {
 
   const loadProducts = async () => {
     if (!IS_CONFIGURED) { setLoading(false); return; }
-    setLoading(true);
-    setError("");
-    try {
-      const data = await API.list();
-      setProducts(data || []);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setError("");
+    try { const data = await API.list(); setProducts(data || []); }
+    catch (e) { setError(e.message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { loadProducts(); }, []);
@@ -688,7 +678,6 @@ export default function App() {
   const onLogin = (user) => { setAdmin(user); setShowLogin(false); setView("admin"); };
   const onLogout = async () => { await sbLogout(); setAdmin(null); setView("catalog"); loadProducts(); };
 
-  // Admin view
   if (view === "admin" && admin) {
     return (
       <>
@@ -705,7 +694,6 @@ export default function App() {
     );
   }
 
-  // Visitor / Catalog view
   return (
     <>
       <header className="hdr">
@@ -721,12 +709,9 @@ export default function App() {
           }
         </div>
       </header>
-
       <CatalogView products={products} loading={loading} error={error} />
       <ContactSection />
-
       <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
-
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
     </>
   );
