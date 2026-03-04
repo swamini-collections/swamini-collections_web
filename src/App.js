@@ -10,6 +10,7 @@ const CFG = {
 
 const ADMIN_EMAIL = "vinitakatkar33@gmail.com";
 const IS_CONFIGURED = !CFG.SUPABASE_URL.includes("YOUR_PROJECT_REF");
+const MAP_URL = "https://share.google/jeiOPhAlfrJ03W9jr";
 
 let _token = null;
 
@@ -84,6 +85,7 @@ const GLOBAL_CSS = `
   }
   html, body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
 
+  /* HEADER */
   .hdr { background: var(--maroon-dark); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 20px rgba(0,0,0,.4); }
   .hdr-brand { line-height: 1.2; }
   .hdr-name  { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--gold-light); letter-spacing: .05em; }
@@ -91,6 +93,7 @@ const GLOBAL_CSS = `
   .hdr-author { font-size: .58rem; color: rgba(232,190,96,.6); letter-spacing: .1em; margin-top: .05rem; font-style: italic; }
   .hdr-right { display: flex; align-items: center; gap: .75rem; }
 
+  /* BUTTONS */
   .btn { padding: .5rem 1.25rem; border: none; border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; transition: all .18s; white-space: nowrap; }
   .btn:disabled { opacity: .55; cursor: not-allowed; }
   .btn-gold { background: var(--gold); color: #fff; }
@@ -105,6 +108,7 @@ const GLOBAL_CSS = `
   .btn-danger:hover:not(:disabled) { background: #a93226; }
   .btn-sm { padding: .3rem .75rem; font-size: .78rem; }
 
+  /* HERO */
   .hero { background: linear-gradient(135deg, var(--maroon-dark) 0%, var(--maroon) 55%, #8B3040 100%); padding: 4rem 2rem; text-align: center; position: relative; overflow: hidden; }
   .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C4952A' fill-opacity='0.07'%3E%3Cpath d='M40 0L80 40L40 80L0 40z'/%3E%3C/g%3E%3C/svg%3E"); }
   .hero-inner { position: relative; }
@@ -113,52 +117,71 @@ const GLOBAL_CSS = `
   .hero-line { width: 64px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1rem auto; }
   .hero-sub { color: rgba(251,245,232,.6); font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; }
 
+  /* CATALOG */
   .section-hd { text-align: center; padding: 2.5rem 2rem 1.5rem; }
   .section-hd h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; color: var(--maroon); }
   .section-hd p { color: var(--text-muted); font-size: .82rem; margin-top: .3rem; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; padding: 0 2rem 3rem; max-width: 1400px; margin: 0 auto; }
-  .card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s; }
+  .card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s; display: flex; flex-direction: column; }
   .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
   .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--cream-dark); }
   .card-ph { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--cream-dark), var(--cream)); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-muted); }
-  .card-body { padding: 1rem 1.1rem 1.2rem; border-top: 1px solid var(--cream-dark); }
-  .card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--text); margin-bottom: .35rem; line-height: 1.3; }
-  .card-price { font-size: .95rem; font-weight: 500; color: var(--maroon); margin-bottom: .5rem; }
+  .card-body { padding: 1rem 1.1rem 1.2rem; border-top: 1px solid var(--cream-dark); flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+  .card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .card-price { font-size: .95rem; font-weight: 500; color: var(--maroon); }
+  .card-row { display: flex; align-items: center; justify-content: space-between; margin-top: .2rem; flex-wrap: wrap; gap: .4rem; }
 
+  /* BADGES */
   .badge { display: inline-block; padding: .18rem .58rem; border-radius: 20px; font-size: .7rem; font-weight: 500; letter-spacing: .04em; }
   .badge-avail { background: #E8F5EE; color: var(--green); border: 1px solid #C8E6D4; }
-  .badge-sold { background: #FDEEEC; color: var(--red); border: 1px solid #F5C8C2; }
+  .badge-sold  { background: #FDEEEC; color: var(--red); border: 1px solid #F5C8C2; }
 
+  /* ENQUIRE BUTTON */
+  .btn-enquire { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: .2rem .7rem; border-radius: 20px; font-size: .7rem; font-weight: 500; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .btn-enquire:hover { background: var(--gold); color: #fff; }
+
+  /* STATES */
   .loading, .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; gap: 1rem; color: var(--text-muted); text-align: center; }
   .spinner { width: 36px; height: 36px; border: 3px solid var(--cream-dark); border-top-color: var(--maroon); border-radius: 50%; animation: spin .75s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* OVERLAY / MODAL */
   .overlay { position: fixed; inset: 0; background: rgba(28,10,5,.62); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(3px); }
   .modal { background: #fff; border-radius: 14px; padding: 2rem; width: 100%; max-width: 470px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
   .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 500; color: var(--maroon); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--cream-dark); }
 
+  /* CONTACT MODAL */
+  .contact-modal { background: #fff; border-radius: 14px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); text-align: center; }
+  .contact-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; color: var(--maroon); margin-bottom: .4rem; }
+  .contact-modal-sub { color: var(--text-muted); font-size: .82rem; margin-bottom: 1.5rem; }
+  .contact-modal-grid { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1.5rem; text-align: left; }
+  .contact-item { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; background: var(--cream); border-radius: 8px; border: 1px solid var(--cream-dark); }
+  .contact-item-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .05rem; }
+  .contact-item-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
+  .contact-item-value { font-size: .9rem; color: var(--text); margin-top: .1rem; font-weight: 500; }
+  .contact-item-value a { color: var(--maroon); text-decoration: none; }
+  .contact-item-value a:hover { text-decoration: underline; }
+
+  /* FORM */
   .form-group { margin-bottom: 1rem; }
   .flabel { display: block; font-size: .73rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; margin-bottom: .35rem; }
   .finput, .fselect { width: 100%; padding: .62rem .85rem; border: 1.5px solid #DDD0BC; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text); background: var(--cream); transition: border-color .2s; outline: none; }
   .finput:focus, .fselect:focus { border-color: var(--gold); }
-
   .upload-zone { border: 2px dashed #DDD0BC; border-radius: 8px; padding: 1.2rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--cream); }
   .upload-zone:hover { border-color: var(--gold); background: #FBF5E0; }
   .upload-preview { width: 100%; max-height: 155px; object-fit: cover; border-radius: 6px; margin-bottom: .5rem; display: block; }
   .upload-text { font-size: .82rem; color: var(--text-muted); }
   .upload-hint { font-size: .7rem; color: #bbb; margin-top: .2rem; }
-
   .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; justify-content: flex-end; }
   .err { background: #FDEEEC; color: var(--red); padding: .62rem .85rem; border-radius: 6px; font-size: .83rem; margin-bottom: 1rem; border: 1px solid #F5C8C2; }
-  .suc { background: #E8F5EE; color: var(--green); padding: .62rem .85rem; border-radius: 6px; font-size: .83rem; margin-bottom: 1rem; }
 
+  /* ADMIN */
   .adm-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem; }
   .adm-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--cream-dark); flex-wrap: wrap; gap: 1rem; }
   .adm-hdr h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 500; color: var(--maroon); }
   .adm-hdr p { font-size: .82rem; color: var(--text-muted); margin-top: .25rem; }
   .adm-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
-
   .tbl-wrap { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; }
   table { width: 100%; border-collapse: collapse; min-width: 580px; }
   th { padding: .85rem 1.1rem; text-align: left; font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); background: var(--cream); border-bottom: 1px solid var(--cream-dark); white-space: nowrap; }
@@ -170,12 +193,30 @@ const GLOBAL_CSS = `
   .tbl-act { display: flex; gap: .5rem; }
   .tbl-empty { text-align: center; padding: 3.5rem; color: var(--text-muted); }
 
+  /* CONFIRM */
   .confirm { text-align: center; max-width: 340px; }
   .confirm-icon { font-size: 2.5rem; margin-bottom: .75rem; }
   .confirm h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; margin-bottom: .4rem; }
   .confirm p { color: var(--text-muted); font-size: .88rem; margin-bottom: 1.5rem; }
 
-  .footer { text-align: center; padding: 2rem; border-top: 1px solid var(--cream-dark); color: var(--text-muted); font-size: .75rem; letter-spacing: .05em; }
+  /* CONTACT US SECTION */
+  .contact-section { background: var(--maroon-dark); padding: 3.5rem 2rem; }
+  .contact-section-inner { max-width: 900px; margin: 0 auto; }
+  .contact-section-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: var(--gold-light); text-align: center; letter-spacing: .06em; }
+  .contact-section-line { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: .8rem auto 2rem; }
+  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; }
+  .contact-card { background: rgba(255,255,255,.06); border: 1px solid rgba(196,149,42,.25); border-radius: 12px; padding: 1.5rem 1.2rem; text-align: center; transition: background .2s; }
+  .contact-card:hover { background: rgba(255,255,255,.1); }
+  .contact-card-icon { font-size: 1.8rem; margin-bottom: .6rem; }
+  .contact-card-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .18em; color: var(--gold); font-weight: 500; margin-bottom: .5rem; }
+  .contact-card-value { font-size: .92rem; color: rgba(255,255,255,.85); line-height: 1.5; }
+  .contact-card-value a { color: var(--gold-light); text-decoration: none; }
+  .contact-card-value a:hover { text-decoration: underline; }
+  .btn-map { display: inline-block; margin-top: .6rem; background: var(--green); color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-map:hover { background: #235f3d; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 1.5rem; background: #2A0910; color: rgba(255,255,255,.3); font-size: .73rem; letter-spacing: .06em; }
 
   @media (max-width: 640px) {
     .hero h1 { font-size: 1.8rem; }
@@ -183,31 +224,157 @@ const GLOBAL_CSS = `
     .adm-wrap { padding: 1rem; }
     .hdr { padding: 0 1rem; }
     .hdr-name { font-size: 1.25rem; }
+    .contact-cards { grid-template-columns: 1fr 1fr; }
   }
 `;
 
 // ════════════════════════════════════════════════════════════
-//  🧩  COMPONENTS
+//  CONTACT US SECTION
 // ════════════════════════════════════════════════════════════
-
-function ProductCard({ p }) {
+function ContactSection() {
   return (
-    <div className="card">
-      {p.image_url
-        ? <img className="card-img" src={p.image_url} alt={p.name} loading="lazy" />
-        : <div className="card-ph">🪡</div>
-      }
-      <div className="card-body">
-        <div className="card-name">{p.name}</div>
-        <div className="card-price">₹{Number(p.price).toLocaleString("en-IN")}</div>
-        <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>
-          {p.status}
-        </span>
+    <section className="contact-section">
+      <div className="contact-section-inner">
+        <h2 className="contact-section-title">Contact Us</h2>
+        <div className="contact-section-line" />
+        <div className="contact-cards">
+          <div className="contact-card">
+            <div className="contact-card-icon">📞</div>
+            <div className="contact-card-label">Phone</div>
+            <div className="contact-card-value">
+              <a href="tel:9881679579">9881679579</a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">✉️</div>
+            <div className="contact-card-label">Email</div>
+            <div className="contact-card-value">
+              <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">🏠</div>
+            <div className="contact-card-label">Address</div>
+            <div className="contact-card-value">
+              HV9H+56R, Tank Rd, Shanti Nagar,<br />
+              Vishrantwadi, Pune,<br />
+              Maharashtra 411006
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">📍</div>
+            <div className="contact-card-label">Location</div>
+            <div className="contact-card-value">
+              <a
+                className="btn-map"
+                href={MAP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Map
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  ENQUIRE MODAL (shown when clicking Enquire button)
+// ════════════════════════════════════════════════════════════
+function EnquireModal({ productName, onClose }) {
+  return (
+    <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="contact-modal">
+        <div style={{ fontSize: "2rem", marginBottom: ".5rem" }}>🛍️</div>
+        <div className="contact-modal-title">Interested in this saree?</div>
+        <div className="contact-modal-sub">
+          Please contact us using the below contact details
+        </div>
+        <div className="contact-modal-grid">
+          <div className="contact-item">
+            <div className="contact-item-icon">📞</div>
+            <div>
+              <div className="contact-item-label">Phone</div>
+              <div className="contact-item-value">
+                <a href="tel:9881679579">9881679579</a>
+              </div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">✉️</div>
+            <div>
+              <div className="contact-item-label">Email</div>
+              <div className="contact-item-value">
+                <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
+              </div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">🏠</div>
+            <div>
+              <div className="contact-item-label">Address</div>
+              <div className="contact-item-value">
+                HV9H+56R, Tank Rd, Shanti Nagar,<br />
+                Vishrantwadi, Pune, Maharashtra 411006
+              </div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">📍</div>
+            <div>
+              <div className="contact-item-label">Location</div>
+              <div className="contact-item-value">
+                <a href={MAP_URL} target="_blank" rel="noopener noreferrer">View on Map ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button className="btn btn-primary" style={{ width: "100%" }} onClick={onClose}>
+          Close
+        </button>
       </div>
     </div>
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  PRODUCT CARD
+// ════════════════════════════════════════════════════════════
+function ProductCard({ p }) {
+  const [showEnquire, setShowEnquire] = useState(false);
+  return (
+    <>
+      <div className="card">
+        {p.image_url
+          ? <img className="card-img" src={p.image_url} alt={p.name} loading="lazy" />
+          : <div className="card-ph">🪡</div>
+        }
+        <div className="card-body">
+          <div className="card-name">{p.name}</div>
+          <div className="card-price">₹{Number(p.price).toLocaleString("en-IN")}</div>
+          <div className="card-row">
+            <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>
+              {p.status}
+            </span>
+            <button className="btn-enquire" onClick={() => setShowEnquire(true)}>
+              Enquire
+            </button>
+          </div>
+        </div>
+      </div>
+      {showEnquire && (
+        <EnquireModal productName={p.name} onClose={() => setShowEnquire(false)} />
+      )}
+    </>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  PRODUCT FORM MODAL
+// ════════════════════════════════════════════════════════════
 function ProductFormModal({ product, onClose, onSaved }) {
   const [name, setName] = useState(product?.name || "");
   const [price, setPrice] = useState(product?.price || "");
@@ -236,12 +403,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
     try {
       let url = imgUrl;
       if (imgFile) url = await uploadToCloudinary(imgFile);
-      const payload = {
-        name: name.trim(),
-        price: Number(price),
-        status,
-        ...(url ? { image_url: url } : {}),
-      };
+      const payload = { name: name.trim(), price: Number(price), status, ...(url ? { image_url: url } : {}) };
       isEdit ? await API.update(product.id, payload) : await API.create({ ...payload, image_url: url });
       onSaved();
     } catch (e) {
@@ -300,15 +462,10 @@ function ConfirmModal({ product, onConfirm, onCancel, loading }) {
       <div className="modal confirm">
         <div className="confirm-icon">🗑️</div>
         <h3>Delete Product?</h3>
-        <p>
-          Are you sure you want to delete <strong>"{product.name}"</strong>?
-          <br />This action cannot be undone.
-        </p>
+        <p>Are you sure you want to delete <strong>"{product.name}"</strong>?<br />This action cannot be undone.</p>
         <div className="modal-actions" style={{ justifyContent: "center" }}>
           <button className="btn btn-secondary" onClick={onCancel} disabled={loading}>Cancel</button>
-          <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>
-            {loading ? "Deleting…" : "Yes, Delete"}
-          </button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>{loading ? "Deleting…" : "Yes, Delete"}</button>
         </div>
       </div>
     </div>
@@ -355,9 +512,7 @@ function LoginModal({ onClose, onLogin }) {
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
-          <button className="btn btn-gold" onClick={login} disabled={loading}>
-            {loading ? "Logging in…" : "Login"}
-          </button>
+          <button className="btn btn-gold" onClick={login} disabled={loading}>{loading ? "Logging in…" : "Login"}</button>
         </div>
       </div>
     </div>
@@ -417,9 +572,7 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           <button className="btn btn-primary" onClick={onLogout}>Logout</button>
         </div>
       </div>
-
       {error && <div className="err" style={{ marginBottom: "1rem" }}>{error}</div>}
-
       <div className="tbl-wrap">
         {loading ? (
           <div className="loading"><div className="spinner" /></div>
@@ -432,29 +585,16 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           <table>
             <thead>
               <tr>
-                <th>Image</th>
-                <th>Product Name</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Image</th><th>Product Name</th><th>Price</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.map(p => (
                 <tr key={p.id}>
-                  <td>
-                    {p.image_url
-                      ? <img className="tbl-img" src={p.image_url} alt={p.name} />
-                      : <div className="tbl-ph">🪡</div>
-                    }
-                  </td>
+                  <td>{p.image_url ? <img className="tbl-img" src={p.image_url} alt={p.name} /> : <div className="tbl-ph">🪡</div>}</td>
                   <td style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", fontWeight: 500 }}>{p.name}</td>
                   <td style={{ color: "var(--maroon)", fontWeight: 500 }}>₹{Number(p.price).toLocaleString("en-IN")}</td>
-                  <td>
-                    <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>
-                      {p.status}
-                    </span>
-                  </td>
+                  <td><span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>{p.status}</span></td>
                   <td>
                     <div className="tbl-act">
                       <button className="btn btn-secondary btn-sm" onClick={() => openEdit(p)}>✏️ Edit</button>
@@ -467,22 +607,8 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           </table>
         )}
       </div>
-
-      {showForm && (
-        <ProductFormModal
-          product={editProduct}
-          onClose={() => { setShowForm(false); setEditProduct(null); }}
-          onSaved={onSaved}
-        />
-      )}
-      {deleteTarget && (
-        <ConfirmModal
-          product={deleteTarget}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
-          loading={deleting}
-        />
-      )}
+      {showForm && <ProductFormModal product={editProduct} onClose={() => { setShowForm(false); setEditProduct(null); }} onSaved={onSaved} />}
+      {deleteTarget && <ConfirmModal product={deleteTarget} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} loading={deleting} />}
     </div>
   );
 }
@@ -562,7 +688,7 @@ export default function App() {
   const onLogin = (user) => { setAdmin(user); setShowLogin(false); setView("admin"); };
   const onLogout = async () => { await sbLogout(); setAdmin(null); setView("catalog"); loadProducts(); };
 
-  // ─── Admin view ───────────────────────────────────────────
+  // Admin view
   if (view === "admin" && admin) {
     return (
       <>
@@ -574,12 +700,12 @@ export default function App() {
           </div>
         </header>
         <AdminPanel onLogout={onLogout} onViewCatalog={() => { setView("catalog"); loadProducts(); }} />
-        <footer className="footer">© {new Date().getFullYear()} Swamini Collections · Admin Portal</footer>
+        <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
       </>
     );
   }
 
-  // ─── Visitor / Catalog view ───────────────────────────────
+  // Visitor / Catalog view
   return (
     <>
       <header className="hdr">
@@ -595,8 +721,12 @@ export default function App() {
           }
         </div>
       </header>
+
       <CatalogView products={products} loading={loading} error={error} />
+      <ContactSection />
+
       <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
+
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
     </>
   );
