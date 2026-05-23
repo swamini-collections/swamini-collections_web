@@ -411,6 +411,14 @@ function ProductFormModal({ product, onClose, onSaved }) {
   const onFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
+    // Validate by extension since we removed accept="" to fix Windows/OneDrive file picker
+    const ext = f.name.split(".").pop().toLowerCase();
+    const allowed = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif"];
+    if (!allowed.includes(ext)) {
+      setError("Please select an image file (JPEG, PNG, WebP, etc.).");
+      return;
+    }
+    setError("");
     setImgFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -462,9 +470,9 @@ function ProductFormModal({ product, onClose, onSaved }) {
               : <div style={{ padding: "1rem 0", fontSize: "2rem" }}>📷</div>
             }
             <div className="upload-text">{preview ? "Click to change image" : "Click to upload image"}</div>
-            <div className="upload-hint">JPEG · PNG · WebP — max 32 MB</div>
+            <div className="upload-hint">JPEG · PNG · WebP · HEIC — max 32 MB</div>
           </div>
-          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
+          <input ref={fileRef} type="file" style={{ display: "none" }} onChange={onFile} />
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
@@ -714,7 +722,5 @@ export default function App() {
       <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
     </>
-  );
-}
   );
 }
