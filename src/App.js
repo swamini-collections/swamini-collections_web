@@ -4,8 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 const CFG = {
   SUPABASE_URL: "https://cprexncpokmepivifiup.supabase.co",
   SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwcmV4bmNwb2ttZXBpdmlmaXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2Mjc1NTksImV4cCI6MjA4ODIwMzU1OX0.n1MzRjXJQX3T23SKDb5OYpuersIiObAtbINDewiXolc",
-  CLOUDINARY_NAME: "dysbgzoxx",
-  CLOUDINARY_PRESET: "swamini_upload",
+  IMGBB_KEY: "146c4fb4ae85ea0d9154f1b382aa6403",
 };
 
 const ADMIN_EMAIL = "vinitakatkar33@gmail.com";
@@ -62,16 +61,17 @@ const API = {
   remove: (id) => sbReq(`/rest/v1/products?id=eq.${id}`, { method: "DELETE" }),
 };
 
-async function uploadToCloudinary(file) {
+async function uploadToImgBB(file) {
   const fd = new FormData();
-  fd.append("file", file);
-  fd.append("upload_preset", CFG.CLOUDINARY_PRESET);
+  fd.append("image", file);
   const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CFG.CLOUDINARY_NAME}/image/upload`,
+    `https://api.imgbb.com/1/upload?key=${CFG.IMGBB_KEY}`,
     { method: "POST", body: fd }
   );
-  if (!res.ok) throw new Error("Image upload failed. Check your Cloudinary config.");
-  return (await res.json()).secure_url;
+  if (!res.ok) throw new Error("Image upload failed. Check your ImgBB API key.");
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error?.message || "Image upload failed.");
+  return data.data.url;
 }
 
 const GLOBAL_CSS = `
@@ -423,7 +423,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
     setError("");
     try {
       let url = imgUrl;
-      if (imgFile) url = await uploadToCloudinary(imgFile);
+      if (imgFile) url = await uploadToImgBB(imgFile);
       const payload = { name: name.trim(), price: Number(price), status, ...(url ? { image_url: url } : {}) };
       isEdit ? await API.update(product.id, payload) : await API.create({ ...payload, image_url: url });
       onSaved();
@@ -462,7 +462,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
               : <div style={{ padding: "1rem 0", fontSize: "2rem" }}>📷</div>
             }
             <div className="upload-text">{preview ? "Click to change image" : "Click to upload image"}</div>
-            <div className="upload-hint">JPEG · PNG · WebP — max 10 MB</div>
+            <div className="upload-hint">JPEG · PNG · WebP — max 32 MB</div>
           </div>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onFile} />
         </div>
@@ -714,5 +714,7 @@ export default function App() {
       <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
     </>
+  );
+}
   );
 }
