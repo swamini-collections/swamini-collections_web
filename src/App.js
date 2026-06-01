@@ -49,16 +49,27 @@ async function sbLogout() {
     fetch(`${CFG.SUPABASE_URL}/auth/v1/logout`, {
       method: "POST",
       headers: { apikey: CFG.SUPABASE_KEY, Authorization: `Bearer ${_token}` },
-    }).catch(() => { });
+    }).catch(() => {});
     _token = null;
   }
 }
 
 const API = {
   list: () => sbReq("/rest/v1/products?select=*&order=created_at.desc"),
-  create: (d) => sbReq("/rest/v1/products", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(d) }),
-  update: (id, d) => sbReq(`/rest/v1/products?id=eq.${id}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify(d) }),
-  remove: (id) => sbReq(`/rest/v1/products?id=eq.${id}`, { method: "DELETE" }),
+  create: (d) =>
+    sbReq("/rest/v1/products", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(d),
+    }),
+  update: (id, d) =>
+    sbReq(`/rest/v1/products?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(d),
+    }),
+  remove: (id) =>
+    sbReq(`/rest/v1/products?id=eq.${id}`, { method: "DELETE" }),
 };
 
 async function uploadToImgBB(file) {
@@ -74,6 +85,7 @@ async function uploadToImgBB(file) {
   return data.data.url;
 }
 
+// ─── GLOBAL CSS ──────────────────────────────────────────────────────────────
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -405,24 +417,24 @@ function ProductCard({ p }) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  CATEGORY FILTER BAR  ← NEW
+//  CATEGORY FILTER BAR
 // ════════════════════════════════════════════════════════════
 function CategoryFilter({ products, activeFilter, onFilterChange }) {
   const counts = {
     All: products.length,
-    Saree: products.filter(p => p.category === "Saree").length,
-    Dress: products.filter(p => p.category === "Dress").length,
+    Saree: products.filter((p) => p.category === "Saree").length,
+    Dress: products.filter((p) => p.category === "Dress").length,
   };
 
   const options = [
-    { key: "All",   label: "All",   icon: "✨" },
-    { key: "Saree", label: "Sarees", icon: "🪡" },
+    { key: "All",   label: "All",     icon: "✨" },
+    { key: "Saree", label: "Sarees",  icon: "🪡" },
     { key: "Dress", label: "Dresses", icon: "👗" },
   ];
 
   return (
     <div className="filter-bar">
-      {options.map(opt => (
+      {options.map((opt) => (
         <button
           key={opt.key}
           className={`filter-btn${activeFilter === opt.key ? " active" : ""}`}
@@ -438,18 +450,18 @@ function CategoryFilter({ products, activeFilter, onFilterChange }) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  PRODUCT FORM MODAL  (now includes Category field)
+//  PRODUCT FORM MODAL
 // ════════════════════════════════════════════════════════════
 function ProductFormModal({ product, onClose, onSaved }) {
-  const [name, setName] = useState(product?.name || "");
-  const [price, setPrice] = useState(product?.price || "");
-  const [status, setStatus] = useState(product?.status || "Available");
-  const [category, setCategory] = useState(product?.category || "Saree");   // ← NEW
-  const [imgUrl, setImgUrl] = useState(product?.image_url || "");
-  const [imgFile, setImgFile] = useState(null);
-  const [preview, setPreview] = useState(product?.image_url || "");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [name, setName]         = useState(product?.name || "");
+  const [price, setPrice]       = useState(product?.price || "");
+  const [status, setStatus]     = useState(product?.status || "Available");
+  const [category, setCategory] = useState(product?.category || "Saree");
+  const [imgUrl, setImgUrl]     = useState(product?.image_url || "");
+  const [imgFile, setImgFile]   = useState(null);
+  const [preview, setPreview]   = useState(product?.image_url || "");
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState("");
   const fileRef = useRef();
   const isEdit = !!product;
 
@@ -480,10 +492,12 @@ function ProductFormModal({ product, onClose, onSaved }) {
         name: name.trim(),
         price: Number(price),
         status,
-        category,                                        // ← NEW
+        category,
         ...(url ? { image_url: url } : {}),
       };
-      isEdit ? await API.update(product.id, payload) : await API.create({ ...payload, image_url: url });
+      isEdit
+        ? await API.update(product.id, payload)
+        : await API.create({ ...payload, image_url: url });
       onSaved();
     } catch (e) {
       setError(e.message);
@@ -497,19 +511,20 @@ function ProductFormModal({ product, onClose, onSaved }) {
       <div className="modal">
         <div className="modal-title">{isEdit ? "✏️ Edit Product" : "➕ Add New Product"}</div>
         {error && <div className="err">{error}</div>}
+
         <div className="form-group">
           <label className="flabel">Product Name *</label>
-          <input className="finput" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Banarasi Silk Saree" />
-        </div>
-        <div className="form-group">
-          <label className="flabel">Price (₹) *</label>
-          <input className="finput" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 4500" min="1" />
+          <input className="finput" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Banarasi Silk Saree" />
         </div>
 
-        {/* ── CATEGORY (NEW) ── */}
+        <div className="form-group">
+          <label className="flabel">Price (₹) *</label>
+          <input className="finput" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 4500" min="1" />
+        </div>
+
         <div className="form-group">
           <label className="flabel">Category *</label>
-          <select className="fselect" value={category} onChange={e => setCategory(e.target.value)}>
+          <select className="fselect" value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="Saree">🪡 Saree</option>
             <option value="Dress">👗 Dress</option>
           </select>
@@ -517,11 +532,12 @@ function ProductFormModal({ product, onClose, onSaved }) {
 
         <div className="form-group">
           <label className="flabel">Status</label>
-          <select className="fselect" value={status} onChange={e => setStatus(e.target.value)}>
+          <select className="fselect" value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="Available">Available</option>
             <option value="Sold Out">Sold Out</option>
           </select>
         </div>
+
         <div className="form-group">
           <label className="flabel">Product Image {!isEdit && "*"}</label>
           <div className="upload-zone" onClick={() => fileRef.current?.click()}>
@@ -534,36 +550,50 @@ function ProductFormModal({ product, onClose, onSaved }) {
           </div>
           <input ref={fileRef} type="file" style={{ display: "none" }} onChange={onFile} />
         </div>
+
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
-          <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Product"}</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Product"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  CONFIRM DELETE MODAL
+// ════════════════════════════════════════════════════════════
 function ConfirmModal({ product, onConfirm, onCancel, loading }) {
   return (
     <div className="overlay">
       <div className="modal confirm">
         <div className="confirm-icon">🗑️</div>
         <h3>Delete Product?</h3>
-        <p>Are you sure you want to delete <strong>"{product.name}"</strong>?<br />This action cannot be undone.</p>
+        <p>
+          Are you sure you want to delete <strong>"{product.name}"</strong>?<br />
+          This action cannot be undone.
+        </p>
         <div className="modal-actions" style={{ justifyContent: "center" }}>
           <button className="btn btn-secondary" onClick={onCancel} disabled={loading}>Cancel</button>
-          <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>{loading ? "Deleting…" : "Yes, Delete"}</button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>
+            {loading ? "Deleting…" : "Yes, Delete"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  LOGIN MODAL
+// ════════════════════════════════════════════════════════════
 function LoginModal({ onClose, onLogin }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
 
   const login = async () => {
     if (!email || !password) return setError("Please enter email and password.");
@@ -591,15 +621,17 @@ function LoginModal({ onClose, onLogin }) {
         {error && <div className="err">{error}</div>}
         <div className="form-group">
           <label className="flabel">Email</label>
-          <input className="finput" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@example.com" onKeyDown={onKey} autoFocus />
+          <input className="finput" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@example.com" onKeyDown={onKey} autoFocus />
         </div>
         <div className="form-group">
           <label className="flabel">Password</label>
-          <input className="finput" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={onKey} />
+          <input className="finput" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={onKey} />
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
-          <button className="btn btn-gold" onClick={login} disabled={loading}>{loading ? "Logging in…" : "Login"}</button>
+          <button className="btn btn-gold" onClick={login} disabled={loading}>
+            {loading ? "Logging in…" : "Login"}
+          </button>
         </div>
       </div>
     </div>
@@ -607,35 +639,47 @@ function LoginModal({ onClose, onLogin }) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  ADMIN PANEL  (Category column added to table)
+//  ADMIN PANEL
 // ════════════════════════════════════════════════════════════
 function AdminPanel({ onLogout, onViewCatalog }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [products, setProducts]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
+  const [showForm, setShowForm]       = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleting, setDeleting]       = useState(false);
 
   const load = async () => {
-    setLoading(true); setError("");
-    try { const data = await API.list(); setProducts(data || []); }
-    catch (e) { setError("Failed to load products: " + e.message); }
-    finally { setLoading(false); }
+    setLoading(true);
+    setError("");
+    try {
+      const data = await API.list();
+      setProducts(data || []);
+    } catch (e) {
+      setError("Failed to load products: " + e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
-    try { await API.remove(deleteTarget.id); setDeleteTarget(null); load(); }
-    catch (e) { setError("Delete failed: " + e.message); setDeleting(false); }
+    try {
+      await API.remove(deleteTarget.id);
+      setDeleteTarget(null);
+      load();
+    } catch (e) {
+      setError("Delete failed: " + e.message);
+      setDeleting(false);
+    }
   };
 
-  const openAdd = () => { setEditProduct(null); setShowForm(true); };
+  const openAdd  = () => { setEditProduct(null); setShowForm(true); };
   const openEdit = (p) => { setEditProduct(p); setShowForm(true); };
-  const onSaved = () => { setShowForm(false); setEditProduct(null); load(); };
+  const onSaved  = () => { setShowForm(false); setEditProduct(null); load(); };
 
   const catBadgeClass = (cat) => {
     if (cat === "Saree") return "badge badge-cat-saree";
@@ -656,7 +700,9 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           <button className="btn btn-primary" onClick={onLogout}>Logout</button>
         </div>
       </div>
+
       {error && <div className="err" style={{ marginBottom: "1rem" }}>{error}</div>}
+
       <div className="tbl-wrap">
         {loading ? (
           <div className="loading"><div className="spinner" /></div>
@@ -667,12 +713,25 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           </div>
         ) : (
           <table>
-            {/* ── Category column added ── */}
-            <thead><tr><th>Image</th><th>Product Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
             <tbody>
-              {products.map(p => (
+              {products.map((p) => (
                 <tr key={p.id}>
-                  <td>{p.image_url ? <img className="tbl-img" src={p.image_url} alt={p.name} /> : <div className="tbl-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>}</td>
+                  <td>
+                    {p.image_url
+                      ? <img className="tbl-img" src={p.image_url} alt={p.name} />
+                      : <div className="tbl-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>
+                    }
+                  </td>
                   <td style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", fontWeight: 500 }}>{p.name}</td>
                   <td><span className={catBadgeClass(p.category)}>{p.category || "—"}</span></td>
                   <td style={{ color: "var(--maroon)", fontWeight: 500 }}>₹{Number(p.price).toLocaleString("en-IN")}</td>
@@ -689,22 +748,36 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           </table>
         )}
       </div>
-      {showForm && <ProductFormModal product={editProduct} onClose={() => { setShowForm(false); setEditProduct(null); }} onSaved={onSaved} />}
-      {deleteTarget && <ConfirmModal product={deleteTarget} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} loading={deleting} />}
+
+      {showForm && (
+        <ProductFormModal
+          product={editProduct}
+          onClose={() => { setShowForm(false); setEditProduct(null); }}
+          onSaved={onSaved}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmModal
+          product={deleteTarget}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={deleting}
+        />
+      )}
     </div>
   );
 }
 
 // ════════════════════════════════════════════════════════════
-//  CATALOG VIEW  (filter wired in)
+//  CATALOG VIEW
 // ════════════════════════════════════════════════════════════
 function CatalogView({ products, loading, error }) {
-  const [activeFilter, setActiveFilter] = useState("All");   // ← NEW
+  const [activeFilter, setActiveFilter] = useState("All");
 
-  // Apply filter
-  const visibleProducts = activeFilter === "All"
-    ? products
-    : products.filter(p => p.category === activeFilter);
+  const visibleProducts =
+    activeFilter === "All"
+      ? products
+      : products.filter((p) => p.category === activeFilter);
 
   return (
     <>
@@ -720,11 +793,13 @@ function CatalogView({ products, loading, error }) {
         <h2>Our Collection</h2>
         {!loading && !error && (
           <p>
-            {visibleProducts.length} {activeFilter === "All" ? "item" : activeFilter.toLowerCase()}{visibleProducts.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe
+            {visibleProducts.length}{" "}
+            {activeFilter === "All" ? "item" : activeFilter.toLowerCase()}
+            {visibleProducts.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe
           </p>
         )}
 
-        {/* ── Filter bar ── */}
+        {/* ── Filter buttons ── */}
         {!loading && !error && products.length > 0 && (
           <CategoryFilter
             products={products}
@@ -735,7 +810,10 @@ function CatalogView({ products, loading, error }) {
       </div>
 
       {loading ? (
-        <div className="loading"><div className="spinner" /><span>Loading collection…</span></div>
+        <div className="loading">
+          <div className="spinner" />
+          <span>Loading collection…</span>
+        </div>
       ) : error ? (
         <div className="empty-state">
           <div style={{ fontSize: "2.5rem" }}>⚠️</div>
@@ -747,13 +825,21 @@ function CatalogView({ products, loading, error }) {
           <div style={{ fontSize: "2.5rem" }}>{activeFilter === "Dress" ? "👗" : "🪡"}</div>
           <p>No {activeFilter === "All" ? "products" : activeFilter.toLowerCase() + "s"} yet — check back soon!</p>
           {activeFilter !== "All" && (
-            <button className="btn btn-secondary" style={{ marginTop: ".5rem" }} onClick={() => setActiveFilter("All")}>
+            <button
+              className="btn btn-secondary"
+              style={{ marginTop: ".5rem" }}
+              onClick={() => setActiveFilter("All")}
+            >
               Show all items
             </button>
           )}
         </div>
       ) : (
-        <div className="grid">{visibleProducts.map(p => <ProductCard key={p.id} p={p} />)}</div>
+        <div className="grid">
+          {visibleProducts.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
+        </div>
       )}
     </>
   );
@@ -763,12 +849,12 @@ function CatalogView({ products, loading, error }) {
 //  🚀  ROOT APP
 // ════════════════════════════════════════════════════════════
 export default function App() {
-  const [view, setView] = useState("catalog");
-  const [admin, setAdmin] = useState(null);
+  const [view, setView]         = useState("catalog");
+  const [admin, setAdmin]       = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
 
   useEffect(() => {
     const el = document.createElement("style");
@@ -779,15 +865,21 @@ export default function App() {
 
   const loadProducts = async () => {
     if (!IS_CONFIGURED) { setLoading(false); return; }
-    setLoading(true); setError("");
-    try { const data = await API.list(); setProducts(data || []); }
-    catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    setLoading(true);
+    setError("");
+    try {
+      const data = await API.list();
+      setProducts(data || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadProducts(); }, []);
 
-  const onLogin = (user) => { setAdmin(user); setShowLogin(false); setView("admin"); };
+  const onLogin  = (user) => { setAdmin(user); setShowLogin(false); setView("admin"); };
   const onLogout = async () => { await sbLogout(); setAdmin(null); setView("catalog"); loadProducts(); };
 
   if (view === "admin" && admin) {
@@ -800,8 +892,13 @@ export default function App() {
             <div className="hdr-author">author | Om Katkar</div>
           </div>
         </header>
-        <AdminPanel onLogout={onLogout} onViewCatalog={() => { setView("catalog"); loadProducts(); }} />
-        <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
+        <AdminPanel
+          onLogout={onLogout}
+          onViewCatalog={() => { setView("catalog"); loadProducts(); }}
+        />
+        <footer className="footer">
+          © {new Date().getFullYear()} Swamini Collections · All rights reserved.
+        </footer>
       </>
     );
   }
@@ -821,9 +918,14 @@ export default function App() {
           }
         </div>
       </header>
+
       <CatalogView products={products} loading={loading} error={error} />
       <ContactSection />
-      <footer className="footer">© {new Date().getFullYear()} Swamini Collections · All rights reserved.</footer>
+
+      <footer className="footer">
+        © {new Date().getFullYear()} Swamini Collections · All rights reserved.
+      </footer>
+
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
     </>
   );
