@@ -139,6 +139,23 @@ const GLOBAL_CSS = `
   .btn-enquire { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: .2rem .7rem; border-radius: 20px; font-size: .7rem; font-weight: 500; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
   .btn-enquire:hover { background: var(--gold); color: #fff; }
 
+  /* ── CATEGORY FILTER ── */
+  .filter-bar { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-top: 1.2rem; flex-wrap: wrap; }
+  .filter-btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .45rem 1.2rem; border-radius: 25px; border: 1.5px solid var(--gold);
+    background: transparent; color: var(--gold); font-family: 'DM Sans', sans-serif;
+    font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .2s;
+    letter-spacing: .04em;
+  }
+  .filter-btn:hover { background: var(--gold); color: #fff; }
+  .filter-btn.active { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+  .filter-btn .filter-count {
+    background: rgba(255,255,255,.25); color: inherit;
+    border-radius: 10px; padding: .05rem .42rem; font-size: .7rem; font-weight: 600;
+  }
+  .filter-btn.active .filter-count { background: rgba(255,255,255,.2); }
+
   /* STATES */
   .loading, .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; gap: 1rem; color: var(--text-muted); text-align: center; }
   .spinner { width: 36px; height: 36px; border: 3px solid var(--cream-dark); border-top-color: var(--maroon); border-radius: 50%; animation: spin .75s linear infinite; }
@@ -181,7 +198,7 @@ const GLOBAL_CSS = `
   .adm-hdr p { font-size: .82rem; color: var(--text-muted); margin-top: .25rem; }
   .adm-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
   .tbl-wrap { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 580px; }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; }
   th { padding: .85rem 1.1rem; text-align: left; font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); background: var(--cream); border-bottom: 1px solid var(--cream-dark); white-space: nowrap; }
   td { padding: .85rem 1.1rem; border-bottom: 1px solid var(--cream-dark); font-size: .88rem; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
@@ -190,6 +207,11 @@ const GLOBAL_CSS = `
   .tbl-ph { width: 52px; height: 52px; border-radius: 6px; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
   .tbl-act { display: flex; gap: .5rem; }
   .tbl-empty { text-align: center; padding: 3.5rem; color: var(--text-muted); }
+
+  /* category badge in admin table */
+  .badge-cat-saree { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+  .badge-cat-dress { background: #FFF0F6; color: #9D174D; border: 1px solid #FBCFE8; }
+  .badge-cat-other { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
 
   /* CONFIRM */
   .confirm { text-align: center; max-width: 340px; }
@@ -228,6 +250,8 @@ const GLOBAL_CSS = `
     .hdr { padding: 0 1rem; }
     .hdr-name { font-size: 1.25rem; }
     .contact-cards { grid-template-columns: 1fr 1fr; }
+    .filter-bar { gap: .45rem; }
+    .filter-btn { font-size: .76rem; padding: .38rem .9rem; }
   }
 `;
 
@@ -241,8 +265,6 @@ function ContactSection() {
         <h2 className="contact-section-title">Contact Us</h2>
         <div className="contact-section-line" />
         <div className="contact-cards">
-
-          {/* Phone */}
           <div className="contact-card">
             <div className="contact-card-icon">📞</div>
             <div className="contact-card-label">Phone</div>
@@ -250,8 +272,6 @@ function ContactSection() {
               <a href="tel:9881679579">9881679579</a>
             </div>
           </div>
-
-          {/* Email */}
           <div className="contact-card">
             <div className="contact-card-icon">✉️</div>
             <div className="contact-card-label">Email</div>
@@ -259,8 +279,6 @@ function ContactSection() {
               <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
             </div>
           </div>
-
-          {/* Primary Address */}
           <div className="contact-card">
             <div className="contact-card-icon">🏠</div>
             <div className="contact-card-label">Address</div>
@@ -270,8 +288,6 @@ function ContactSection() {
               Pune, Maharashtra 411006
             </div>
           </div>
-
-          {/* Map */}
           <div className="contact-card">
             <div className="contact-card-icon">📍</div>
             <div className="contact-card-label">Location</div>
@@ -281,8 +297,6 @@ function ContactSection() {
               </a>
             </div>
           </div>
-
-          {/* WhatsApp Group */}
           <div className="contact-card">
             <div className="contact-card-icon">💬</div>
             <div className="contact-card-label">WhatsApp Group</div>
@@ -294,8 +308,6 @@ function ContactSection() {
               </a>
             </div>
           </div>
-
-          {/* Alternate Address */}
           <div className="contact-card">
             <div className="contact-card-icon">🏢</div>
             <div className="contact-card-label">Alternate Address</div>
@@ -307,7 +319,6 @@ function ContactSection() {
               </span>
             </div>
           </div>
-
         </div>
       </div>
     </section>
@@ -322,7 +333,7 @@ function EnquireModal({ productName, onClose }) {
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="contact-modal">
         <div style={{ fontSize: "2rem", marginBottom: ".5rem" }}>🛍️</div>
-        <div className="contact-modal-title">Interested in this saree?</div>
+        <div className="contact-modal-title">Interested in this item?</div>
         <div className="contact-modal-sub">Please contact us using the below contact details</div>
         <div className="contact-modal-grid">
           <div className="contact-item">
@@ -377,7 +388,7 @@ function ProductCard({ p }) {
       <div className="card">
         {p.image_url
           ? <img className="card-img" src={p.image_url} alt={p.name} loading="lazy" />
-          : <div className="card-ph">🪡</div>
+          : <div className="card-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>
         }
         <div className="card-body">
           <div className="card-name">{p.name}</div>
@@ -394,12 +405,46 @@ function ProductCard({ p }) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  PRODUCT FORM MODAL
+//  CATEGORY FILTER BAR  ← NEW
+// ════════════════════════════════════════════════════════════
+function CategoryFilter({ products, activeFilter, onFilterChange }) {
+  const counts = {
+    All: products.length,
+    Saree: products.filter(p => p.category === "Saree").length,
+    Dress: products.filter(p => p.category === "Dress").length,
+  };
+
+  const options = [
+    { key: "All",   label: "All",   icon: "✨" },
+    { key: "Saree", label: "Sarees", icon: "🪡" },
+    { key: "Dress", label: "Dresses", icon: "👗" },
+  ];
+
+  return (
+    <div className="filter-bar">
+      {options.map(opt => (
+        <button
+          key={opt.key}
+          className={`filter-btn${activeFilter === opt.key ? " active" : ""}`}
+          onClick={() => onFilterChange(opt.key)}
+        >
+          <span>{opt.icon}</span>
+          {opt.label}
+          <span className="filter-count">{counts[opt.key]}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  PRODUCT FORM MODAL  (now includes Category field)
 // ════════════════════════════════════════════════════════════
 function ProductFormModal({ product, onClose, onSaved }) {
   const [name, setName] = useState(product?.name || "");
   const [price, setPrice] = useState(product?.price || "");
   const [status, setStatus] = useState(product?.status || "Available");
+  const [category, setCategory] = useState(product?.category || "Saree");   // ← NEW
   const [imgUrl, setImgUrl] = useState(product?.image_url || "");
   const [imgFile, setImgFile] = useState(null);
   const [preview, setPreview] = useState(product?.image_url || "");
@@ -411,7 +456,6 @@ function ProductFormModal({ product, onClose, onSaved }) {
   const onFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
-    // Validate by extension since we removed accept="" to fix Windows/OneDrive file picker
     const ext = f.name.split(".").pop().toLowerCase();
     const allowed = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif"];
     if (!allowed.includes(ext)) {
@@ -432,7 +476,13 @@ function ProductFormModal({ product, onClose, onSaved }) {
     try {
       let url = imgUrl;
       if (imgFile) url = await uploadToImgBB(imgFile);
-      const payload = { name: name.trim(), price: Number(price), status, ...(url ? { image_url: url } : {}) };
+      const payload = {
+        name: name.trim(),
+        price: Number(price),
+        status,
+        category,                                        // ← NEW
+        ...(url ? { image_url: url } : {}),
+      };
       isEdit ? await API.update(product.id, payload) : await API.create({ ...payload, image_url: url });
       onSaved();
     } catch (e) {
@@ -455,6 +505,16 @@ function ProductFormModal({ product, onClose, onSaved }) {
           <label className="flabel">Price (₹) *</label>
           <input className="finput" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 4500" min="1" />
         </div>
+
+        {/* ── CATEGORY (NEW) ── */}
+        <div className="form-group">
+          <label className="flabel">Category *</label>
+          <select className="fselect" value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="Saree">🪡 Saree</option>
+            <option value="Dress">👗 Dress</option>
+          </select>
+        </div>
+
         <div className="form-group">
           <label className="flabel">Status</label>
           <select className="fselect" value={status} onChange={e => setStatus(e.target.value)}>
@@ -546,6 +606,9 @@ function LoginModal({ onClose, onLogin }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  ADMIN PANEL  (Category column added to table)
+// ════════════════════════════════════════════════════════════
 function AdminPanel({ onLogout, onViewCatalog }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -574,6 +637,12 @@ function AdminPanel({ onLogout, onViewCatalog }) {
   const openEdit = (p) => { setEditProduct(p); setShowForm(true); };
   const onSaved = () => { setShowForm(false); setEditProduct(null); load(); };
 
+  const catBadgeClass = (cat) => {
+    if (cat === "Saree") return "badge badge-cat-saree";
+    if (cat === "Dress") return "badge badge-cat-dress";
+    return "badge badge-cat-other";
+  };
+
   return (
     <div className="adm-wrap">
       <div className="adm-hdr">
@@ -598,12 +667,14 @@ function AdminPanel({ onLogout, onViewCatalog }) {
           </div>
         ) : (
           <table>
-            <thead><tr><th>Image</th><th>Product Name</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            {/* ── Category column added ── */}
+            <thead><tr><th>Image</th><th>Product Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {products.map(p => (
                 <tr key={p.id}>
-                  <td>{p.image_url ? <img className="tbl-img" src={p.image_url} alt={p.name} /> : <div className="tbl-ph">🪡</div>}</td>
+                  <td>{p.image_url ? <img className="tbl-img" src={p.image_url} alt={p.name} /> : <div className="tbl-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>}</td>
                   <td style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", fontWeight: 500 }}>{p.name}</td>
+                  <td><span className={catBadgeClass(p.category)}>{p.category || "—"}</span></td>
                   <td style={{ color: "var(--maroon)", fontWeight: 500 }}>₹{Number(p.price).toLocaleString("en-IN")}</td>
                   <td><span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>{p.status}</span></td>
                   <td>
@@ -624,20 +695,45 @@ function AdminPanel({ onLogout, onViewCatalog }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  CATALOG VIEW  (filter wired in)
+// ════════════════════════════════════════════════════════════
 function CatalogView({ products, loading, error }) {
+  const [activeFilter, setActiveFilter] = useState("All");   // ← NEW
+
+  // Apply filter
+  const visibleProducts = activeFilter === "All"
+    ? products
+    : products.filter(p => p.category === activeFilter);
+
   return (
     <>
       <div className="hero">
         <div className="hero-inner">
           <h1>Swamini <em>Collections</em></h1>
           <div className="hero-line" />
-          <p className="hero-sub">Handpicked Sarees · Timeless Elegance</p>
+          <p className="hero-sub">Handpicked Sarees & Dresses · Timeless Elegance</p>
         </div>
       </div>
+
       <div className="section-hd">
         <h2>Our Collection</h2>
-        {!loading && !error && <p>{products.length} exquisite saree{products.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe</p>}
+        {!loading && !error && (
+          <p>
+            {visibleProducts.length} {activeFilter === "All" ? "item" : activeFilter.toLowerCase()}{visibleProducts.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe
+          </p>
+        )}
+
+        {/* ── Filter bar ── */}
+        {!loading && !error && products.length > 0 && (
+          <CategoryFilter
+            products={products}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+        )}
       </div>
+
       {loading ? (
         <div className="loading"><div className="spinner" /><span>Loading collection…</span></div>
       ) : error ? (
@@ -646,10 +742,18 @@ function CatalogView({ products, loading, error }) {
           <p style={{ fontWeight: 500 }}>Unable to load products</p>
           <p style={{ fontSize: ".82rem", color: "var(--text-muted)" }}>{error}</p>
         </div>
-      ) : products.length === 0 ? (
-        <div className="empty-state"><div style={{ fontSize: "2.5rem" }}>🪡</div><p>No products yet — check back soon!</p></div>
+      ) : visibleProducts.length === 0 ? (
+        <div className="empty-state">
+          <div style={{ fontSize: "2.5rem" }}>{activeFilter === "Dress" ? "👗" : "🪡"}</div>
+          <p>No {activeFilter === "All" ? "products" : activeFilter.toLowerCase() + "s"} yet — check back soon!</p>
+          {activeFilter !== "All" && (
+            <button className="btn btn-secondary" style={{ marginTop: ".5rem" }} onClick={() => setActiveFilter("All")}>
+              Show all items
+            </button>
+          )}
+        </div>
       ) : (
-        <div className="grid">{products.map(p => <ProductCard key={p.id} p={p} />)}</div>
+        <div className="grid">{visibleProducts.map(p => <ProductCard key={p.id} p={p} />)}</div>
       )}
     </>
   );
@@ -707,7 +811,7 @@ export default function App() {
       <header className="hdr">
         <div className="hdr-brand">
           <div className="hdr-name">Swamini Collections</div>
-          <div className="hdr-tag">Handpicked Sarees</div>
+          <div className="hdr-tag">Handpicked Sarees & Dresses</div>
           <div className="hdr-author">author | Om Katkar</div>
         </div>
         <div className="hdr-right">
