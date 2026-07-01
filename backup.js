@@ -1,0 +1,964 @@
+/* eslint-disable */
+import React, { useState, useEffect, useRef } from "react";
+
+const CFG = {
+  SUPABASE_URL: "https://cprexncpokmepivifiup.supabase.co",
+  SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwcmV4bmNwb2ttZXBpdmlmaXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2Mjc1NTksImV4cCI6MjA4ODIwMzU1OX0.n1MzRjXJQX3T23SKDb5OYpuersIiObAtbINDewiXolc",
+  IMGBB_KEY: "146c4fb4ae85ea0d9154f1b382aa6403",
+};
+
+const ADMIN_EMAIL = "vinitakatkar33@gmail.com";
+const IS_CONFIGURED = !CFG.SUPABASE_URL.includes("YOUR_PROJECT_REF");
+const MAP_URL = "https://share.google/jeiOPhAlfrJ03W9jr";
+const WHATSAPP_URL = "https://chat.whatsapp.com/BjX1hFJkXJJ573Nc64oCUt?mode=gi_t";
+
+let _token = null;
+
+async function sbReq(path, opts = {}) {
+  const headers = {
+    apikey: CFG.SUPABASE_KEY,
+    "Content-Type": "application/json",
+    ...(opts.headers || {}),
+  };
+  if (_token) headers["Authorization"] = `Bearer ${_token}`;
+  const res = await fetch(CFG.SUPABASE_URL + path, { ...opts, headers });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || e.error_description || `Error ${res.status}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+async function sbLogin(email, password) {
+  const res = await fetch(
+    `${CFG.SUPABASE_URL}/auth/v1/token?grant_type=password`,
+    {
+      method: "POST",
+      headers: { apikey: CFG.SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }
+  );
+  if (!res.ok) throw new Error("Invalid email or password.");
+  const data = await res.json();
+  _token = data.access_token;
+  return data.user;
+}
+
+async function sbLogout() {
+  if (_token) {
+    fetch(`${CFG.SUPABASE_URL}/auth/v1/logout`, {
+      method: "POST",
+      headers: { apikey: CFG.SUPABASE_KEY, Authorization: `Bearer ${_token}` },
+    }).catch(() => {});
+    _token = null;
+  }
+}
+
+const API = {
+  list: () => sbReq("/rest/v1/products?select=*&order=created_at.desc"),
+  create: (d) =>
+    sbReq("/rest/v1/products", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(d),
+    }),
+  update: (id, d) =>
+    sbReq(`/rest/v1/products?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(d),
+    }),
+  remove: (id) =>
+    sbReq(`/rest/v1/products?id=eq.${id}`, { method: "DELETE" }),
+};
+
+async function uploadToImgBB(file) {
+  const fd = new FormData();
+  fd.append("image", file);
+  const res = await fetch(
+    `https://api.imgbb.com/1/upload?key=${CFG.IMGBB_KEY}`,
+    { method: "POST", body: fd }
+  );
+  if (!res.ok) throw new Error("Image upload failed. Check your ImgBB API key.");
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error?.message || "Image upload failed.");
+  return data.data.url;
+}
+
+// ─── GLOBAL CSS ──────────────────────────────────────────────────────────────
+const GLOBAL_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --maroon: #6B1E26; --maroon-dark: #3E0C13; --gold: #C4952A; --gold-light: #E8BE60;
+    --cream: #FBF5E8; --cream-dark: #F0E4CC; --text: #1C0A05; --text-muted: #7A5540;
+    --green: #2D7A4F; --red: #C0392B; --wa: #25D366;
+    --shadow: 0 4px 24px rgba(60,10,20,0.10); --shadow-lg: 0 12px 48px rgba(60,10,20,0.18);
+    --radius: 10px;
+  }
+  html, body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .hdr { background: var(--maroon-dark); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 70px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 20px rgba(0,0,0,.4); }
+  .hdr-brand { line-height: 1.2; }
+  .hdr-name  { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--gold-light); letter-spacing: .05em; }
+  .hdr-tag   { font-size: .58rem; color: rgba(255,255,255,.4); letter-spacing: .18em; text-transform: uppercase; }
+  .hdr-author { font-size: .58rem; color: rgba(232,190,96,.6); letter-spacing: .1em; margin-top: .05rem; font-style: italic; }
+  .hdr-right { display: flex; align-items: center; gap: .75rem; }
+
+  /* BUTTONS */
+  .btn { padding: .5rem 1.25rem; border: none; border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; transition: all .18s; white-space: nowrap; }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-gold { background: var(--gold); color: #fff; }
+  .btn-gold:hover:not(:disabled) { background: var(--gold-light); color: var(--text); }
+  .btn-outline { background: transparent; color: rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.3); }
+  .btn-outline:hover:not(:disabled) { background: rgba(255,255,255,.12); color: #fff; }
+  .btn-primary { background: var(--maroon); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--maroon-dark); }
+  .btn-secondary { background: var(--cream-dark); color: var(--text); border: 1px solid #d0bea0; }
+  .btn-secondary:hover:not(:disabled) { background: #e0ceae; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover:not(:disabled) { background: #a93226; }
+  .btn-sm { padding: .3rem .75rem; font-size: .78rem; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--maroon-dark) 0%, var(--maroon) 55%, #8B3040 100%); padding: 4rem 2rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C4952A' fill-opacity='0.07'%3E%3Cpath d='M40 0L80 40L40 80L0 40z'/%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-inner { position: relative; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem,5vw,3.2rem); font-weight: 300; color: var(--cream); letter-spacing: .08em; }
+  .hero h1 em { font-style: italic; color: var(--gold-light); }
+  .hero-line { width: 64px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1rem auto; }
+  .hero-sub { color: rgba(251,245,232,.6); font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; }
+
+  /* CATALOG */
+  .section-hd { text-align: center; padding: 2.5rem 2rem 1.5rem; }
+  .section-hd h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; color: var(--maroon); }
+  .section-hd p { color: var(--text-muted); font-size: .82rem; margin-top: .3rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; padding: 0 2rem 3rem; max-width: 1400px; margin: 0 auto; }
+  .card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s; display: flex; flex-direction: column; }
+  .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+  .card-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--cream-dark); }
+  .card-ph { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--cream-dark), var(--cream)); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-muted); }
+  .card-body { padding: 1rem 1.1rem 1.2rem; border-top: 1px solid var(--cream-dark); flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+  .card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .card-price { font-size: .95rem; font-weight: 500; color: var(--maroon); }
+  .card-row { display: flex; align-items: center; justify-content: space-between; margin-top: .2rem; flex-wrap: wrap; gap: .4rem; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: .18rem .58rem; border-radius: 20px; font-size: .7rem; font-weight: 500; letter-spacing: .04em; }
+  .badge-avail { background: #E8F5EE; color: var(--green); border: 1px solid #C8E6D4; }
+  .badge-sold  { background: #FDEEEC; color: var(--red); border: 1px solid #F5C8C2; }
+  .btn-enquire { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: .2rem .7rem; border-radius: 20px; font-size: .7rem; font-weight: 500; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .btn-enquire:hover { background: var(--gold); color: #fff; }
+
+  /* ── CATEGORY FILTER ── */
+  .filter-bar { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-top: 1.2rem; flex-wrap: wrap; }
+  .filter-btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .45rem 1.2rem; border-radius: 25px; border: 1.5px solid var(--gold);
+    background: transparent; color: var(--gold); font-family: 'DM Sans', sans-serif;
+    font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .2s;
+    letter-spacing: .04em;
+  }
+  .filter-btn:hover { background: var(--gold); color: #fff; }
+  .filter-btn.active { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+  .filter-btn .filter-count {
+    background: rgba(255,255,255,.25); color: inherit;
+    border-radius: 10px; padding: .05rem .42rem; font-size: .7rem; font-weight: 600;
+  }
+  .filter-btn.active .filter-count { background: rgba(255,255,255,.2); }
+
+  /* STATES */
+  .loading, .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; gap: 1rem; color: var(--text-muted); text-align: center; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--cream-dark); border-top-color: var(--maroon); border-radius: 50%; animation: spin .75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* OVERLAY / MODAL */
+  .overlay { position: fixed; inset: 0; background: rgba(28,10,5,.62); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(3px); }
+  .modal { background: #fff; border-radius: 14px; padding: 2rem; width: 100%; max-width: 470px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 500; color: var(--maroon); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--cream-dark); }
+
+  /* CONTACT MODAL */
+  .contact-modal { background: #fff; border-radius: 14px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); text-align: center; }
+  .contact-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; color: var(--maroon); margin-bottom: .4rem; }
+  .contact-modal-sub { color: var(--text-muted); font-size: .82rem; margin-bottom: 1.5rem; }
+  .contact-modal-grid { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1.5rem; text-align: left; }
+  .contact-item { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; background: var(--cream); border-radius: 8px; border: 1px solid var(--cream-dark); }
+  .contact-item-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .05rem; }
+  .contact-item-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
+  .contact-item-value { font-size: .9rem; color: var(--text); margin-top: .1rem; font-weight: 500; }
+  .contact-item-value a { color: var(--maroon); text-decoration: none; }
+  .contact-item-value a:hover { text-decoration: underline; }
+
+  /* FORM */
+  .form-group { margin-bottom: 1rem; }
+  .flabel { display: block; font-size: .73rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; margin-bottom: .35rem; }
+  .finput, .fselect { width: 100%; padding: .62rem .85rem; border: 1.5px solid #DDD0BC; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text); background: var(--cream); transition: border-color .2s; outline: none; }
+  .finput:focus, .fselect:focus { border-color: var(--gold); }
+  .upload-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: 8px; margin-bottom: .7rem; display: block; border: 1px solid var(--cream-dark); }
+  .upload-btns { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .upload-zone { border: 2px dashed #DDD0BC; border-radius: 8px; padding: 1rem .6rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--cream); }
+  .upload-zone:hover { border-color: var(--gold); background: #FBF5E0; }
+  .upload-zone-icon { font-size: 1.5rem; margin-bottom: .3rem; }
+  .upload-text { font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+  .upload-hint { font-size: .7rem; color: #bbb; margin-top: .5rem; text-align: center; }
+  .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; justify-content: flex-end; }
+  .err { background: #FDEEEC; color: var(--red); padding: .62rem .85rem; border-radius: 6px; font-size: .83rem; margin-bottom: 1rem; border: 1px solid #F5C8C2; }
+
+  /* ADMIN */
+  .adm-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  .adm-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--cream-dark); flex-wrap: wrap; gap: 1rem; }
+  .adm-hdr h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 500; color: var(--maroon); }
+  .adm-hdr p { font-size: .82rem; color: var(--text-muted); margin-top: .25rem; }
+  .adm-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+  .tbl-wrap { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; }
+  th { padding: .85rem 1.1rem; text-align: left; font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); background: var(--cream); border-bottom: 1px solid var(--cream-dark); white-space: nowrap; }
+  td { padding: .85rem 1.1rem; border-bottom: 1px solid var(--cream-dark); font-size: .88rem; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FFFBF5; }
+  .tbl-img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid var(--cream-dark); display: block; }
+  .tbl-ph { width: 52px; height: 52px; border-radius: 6px; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+  .tbl-act { display: flex; gap: .5rem; }
+  .tbl-empty { text-align: center; padding: 3.5rem; color: var(--text-muted); }
+
+  /* category badge in admin table */
+  .badge-cat-saree { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+  .badge-cat-dress { background: #FFF0F6; color: #9D174D; border: 1px solid #FBCFE8; }
+  .badge-cat-other { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
+
+  /* CONFIRM */
+  .confirm { text-align: center; max-width: 340px; }
+  .confirm-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  .confirm h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; margin-bottom: .4rem; }
+  .confirm p { color: var(--text-muted); font-size: .88rem; margin-bottom: 1.5rem; }
+
+  /* CONTACT SECTION */
+  .contact-section { background: var(--maroon-dark); padding: 3.5rem 2rem; }
+  .contact-section-inner { max-width: 1100px; margin: 0 auto; }
+  .contact-section-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: var(--gold-light); text-align: center; letter-spacing: .06em; }
+  .contact-section-line { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: .8rem auto 2rem; }
+  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; }
+  .contact-card { background: rgba(255,255,255,.06); border: 1px solid rgba(196,149,42,.25); border-radius: 12px; padding: 1.5rem 1.2rem; text-align: center; transition: background .2s; }
+  .contact-card:hover { background: rgba(255,255,255,.1); }
+  .contact-card-icon { font-size: 1.8rem; margin-bottom: .6rem; }
+  .contact-card-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .18em; color: var(--gold); font-weight: 500; margin-bottom: .5rem; }
+  .contact-card-value { font-size: .88rem; color: rgba(255,255,255,.85); line-height: 1.6; }
+  .contact-card-value a { color: var(--gold-light); text-decoration: none; }
+  .contact-card-value a:hover { text-decoration: underline; }
+  .btn-map { display: inline-block; margin-top: .6rem; background: var(--green); color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; }
+  .btn-map:hover { background: #235f3d; }
+  .btn-wa { display: inline-block; margin-top: .6rem; background: #25D366; color: #fff; padding: .45rem 1.2rem; border-radius: 25px; font-size: .82rem; font-weight: 500; text-decoration: none; transition: background .2s; }
+  .btn-wa:hover { background: #1da851; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 1.5rem; background: #2A0910; color: rgba(255,255,255,.3); font-size: .73rem; letter-spacing: .06em; }
+
+  @media (max-width: 768px) {
+    .contact-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.8rem; }
+    .grid { padding: 0 1rem 2rem; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .adm-wrap { padding: 1rem; }
+    .hdr { padding: 0 1rem; }
+    .hdr-name { font-size: 1.25rem; }
+    .contact-cards { grid-template-columns: 1fr 1fr; }
+    .filter-bar { gap: .45rem; }
+    .filter-btn { font-size: .76rem; padding: .38rem .9rem; }
+  }
+`;
+
+// ════════════════════════════════════════════════════════════
+//  CONTACT US SECTION
+// ════════════════════════════════════════════════════════════
+function ContactSection() {
+  return (
+    <section className="contact-section">
+      <div className="contact-section-inner">
+        <h2 className="contact-section-title">Contact Us</h2>
+        <div className="contact-section-line" />
+        <div className="contact-cards">
+          <div className="contact-card">
+            <div className="contact-card-icon">📞</div>
+            <div className="contact-card-label">Phone</div>
+            <div className="contact-card-value">
+              <a href="tel:9881679579">9881679579</a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">✉️</div>
+            <div className="contact-card-label">Email</div>
+            <div className="contact-card-value">
+              <a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">🏠</div>
+            <div className="contact-card-label">Address</div>
+            <div className="contact-card-value">
+              HV9H+56R, Tank Rd,<br />
+              Shanti Nagar, Vishrantwadi,<br />
+              Pune, Maharashtra 411006
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">📍</div>
+            <div className="contact-card-label">Location</div>
+            <div className="contact-card-value">
+              <a className="btn-map" href={MAP_URL} target="_blank" rel="noopener noreferrer">
+                View on Map
+              </a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">💬</div>
+            <div className="contact-card-label">WhatsApp Group</div>
+            <div className="contact-card-value">
+              Join our group for<br />latest updates & offers
+              <br />
+              <a className="btn-wa" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                Join Group
+              </a>
+            </div>
+          </div>
+          <div className="contact-card">
+            <div className="contact-card-icon">🏢</div>
+            <div className="contact-card-label">Alternate Address</div>
+            <div className="contact-card-value">
+              Sr No 11/1, DN Parande Park Marg,<br />
+              Dhanori, Pune, Maharashtra 411015<br />
+              <span style={{ fontSize: ".78rem", color: "rgba(232,190,96,.7)", marginTop: ".3rem", display: "block" }}>
+                Gini Belvista — A701
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  ENQUIRE MODAL
+// ════════════════════════════════════════════════════════════
+function EnquireModal({ productName, onClose }) {
+  return (
+    <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="contact-modal">
+        <div style={{ fontSize: "2rem", marginBottom: ".5rem" }}>🛍️</div>
+        <div className="contact-modal-title">Interested in this item?</div>
+        <div className="contact-modal-sub">Please contact us using the below contact details</div>
+        <div className="contact-modal-grid">
+          <div className="contact-item">
+            <div className="contact-item-icon">📞</div>
+            <div>
+              <div className="contact-item-label">Phone</div>
+              <div className="contact-item-value"><a href="tel:9881679579">9881679579</a></div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">✉️</div>
+            <div>
+              <div className="contact-item-label">Email</div>
+              <div className="contact-item-value"><a href="mailto:vinitakatkar33@gmail.com">vinitakatkar33@gmail.com</a></div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">🏠</div>
+            <div>
+              <div className="contact-item-label">Address</div>
+              <div className="contact-item-value">HV9H+56R, Tank Rd, Shanti Nagar,<br />Vishrantwadi, Pune, Maharashtra 411006</div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">📍</div>
+            <div>
+              <div className="contact-item-label">Location</div>
+              <div className="contact-item-value"><a href={MAP_URL} target="_blank" rel="noopener noreferrer">View on Map ↗</a></div>
+            </div>
+          </div>
+          <div className="contact-item">
+            <div className="contact-item-icon">💬</div>
+            <div>
+              <div className="contact-item-label">WhatsApp Group</div>
+              <div className="contact-item-value"><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Join our WhatsApp Group ↗</a></div>
+            </div>
+          </div>
+        </div>
+        <button className="btn btn-primary" style={{ width: "100%" }} onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  PRODUCT CARD
+// ════════════════════════════════════════════════════════════
+function ProductCard({ p }) {
+  const [showEnquire, setShowEnquire] = useState(false);
+  return (
+    <>
+      <div className="card">
+        {p.image_url
+          ? <img className="card-img" src={p.image_url} alt={p.name} loading="lazy" />
+          : <div className="card-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>
+        }
+        <div className="card-body">
+          <div className="card-name">{p.name}</div>
+          <div className="card-price">₹{Number(p.price).toLocaleString("en-IN")}</div>
+          <div className="card-row">
+            <span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>{p.status}</span>
+            <button className="btn-enquire" onClick={() => setShowEnquire(true)}>Enquire</button>
+          </div>
+        </div>
+      </div>
+      {showEnquire && <EnquireModal productName={p.name} onClose={() => setShowEnquire(false)} />}
+    </>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  CATEGORY FILTER BAR
+// ════════════════════════════════════════════════════════════
+function CategoryFilter({ products, activeFilter, onFilterChange }) {
+  const counts = {
+    All: products.length,
+    Saree: products.filter((p) => p.category === "Saree").length,
+    Dress: products.filter((p) => p.category === "Dress").length,
+  };
+
+  const options = [
+    { key: "All",   label: "All",     icon: "✨" },
+    { key: "Saree", label: "Sarees",  icon: "🪡" },
+    { key: "Dress", label: "Dresses", icon: "👗" },
+  ];
+
+  return (
+    <div className="filter-bar">
+      {options.map((opt) => (
+        <button
+          key={opt.key}
+          className={`filter-btn${activeFilter === opt.key ? " active" : ""}`}
+          onClick={() => onFilterChange(opt.key)}
+        >
+          <span>{opt.icon}</span>
+          {opt.label}
+          <span className="filter-count">{counts[opt.key]}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  PRODUCT FORM MODAL
+// ════════════════════════════════════════════════════════════
+function ProductFormModal({ product, onClose, onSaved }) {
+  const [name, setName]         = useState(product?.name || "");
+  const [price, setPrice]       = useState(product?.price || "");
+  const [status, setStatus]     = useState(product?.status || "Available");
+  const [category, setCategory] = useState(product?.category || "Saree");
+  const [imgUrl, setImgUrl]     = useState(product?.image_url || "");
+  const [imgFile, setImgFile]   = useState(null);
+  const [preview, setPreview]   = useState(product?.image_url || "");
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState("");
+  const fileRef   = useRef();   // gallery picker
+  const cameraRef = useRef();   // direct camera capture
+  const isEdit = !!product;
+
+  const onFile = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const ext = f.name.split(".").pop().toLowerCase();
+    const allowed = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif"];
+    if (!allowed.includes(ext)) {
+      setError("Please select an image file (JPEG, PNG, WebP, etc.).");
+      return;
+    }
+    setError("");
+    setImgFile(f);
+    setPreview(URL.createObjectURL(f));
+    // reset both inputs so selecting the same file again still fires onChange
+    if (fileRef.current) fileRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
+  };
+
+  const save = async () => {
+    if (!name.trim()) return setError("Product name is required.");
+    if (!price || isNaN(price) || Number(price) <= 0) return setError("Enter a valid price.");
+    if (!isEdit && !imgFile && !imgUrl) return setError("Please select a product image.");
+    setSaving(true);
+    setError("");
+    try {
+      let url = imgUrl;
+      if (imgFile) url = await uploadToImgBB(imgFile);
+      const payload = {
+        name: name.trim(),
+        price: Number(price),
+        status,
+        category,
+        ...(url ? { image_url: url } : {}),
+      };
+      isEdit
+        ? await API.update(product.id, payload)
+        : await API.create({ ...payload, image_url: url });
+      onSaved();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-title">{isEdit ? "✏️ Edit Product" : "➕ Add New Product"}</div>
+        {error && <div className="err">{error}</div>}
+
+        <div className="form-group">
+          <label className="flabel">Product Name *</label>
+          <input className="finput" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Banarasi Silk Saree" />
+        </div>
+
+        <div className="form-group">
+          <label className="flabel">Price (₹) *</label>
+          <input className="finput" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 4500" min="1" />
+        </div>
+
+        <div className="form-group">
+          <label className="flabel">Category *</label>
+          <select className="fselect" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="Saree">🪡 Saree</option>
+            <option value="Dress">👗 Dress</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="flabel">Status</label>
+          <select className="fselect" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="Available">Available</option>
+            <option value="Sold Out">Sold Out</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="flabel">Product Image {!isEdit && "*"}</label>
+
+          {preview && <img className="upload-preview" src={preview} alt="preview" />}
+
+          <div className="upload-btns">
+            <div className="upload-zone" onClick={() => fileRef.current?.click()}>
+              <div className="upload-zone-icon">🖼️</div>
+              <div className="upload-text">Choose from Gallery</div>
+            </div>
+            <div className="upload-zone" onClick={() => cameraRef.current?.click()}>
+              <div className="upload-zone-icon">📷</div>
+              <div className="upload-text">Take Photo</div>
+            </div>
+          </div>
+
+          <div className="upload-hint">JPEG · PNG · WebP · HEIC — max 32 MB</div>
+
+          {/* Gallery picker: opens the device's photo library / file browser */}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={onFile}
+          />
+
+          {/* Camera capture: capture="environment" opens the device camera directly
+              (rear camera) on mobile browsers instead of the gallery picker */}
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: "none" }}
+            onChange={onFile}
+          />
+        </div>
+
+        <div className="modal-actions">
+          <button className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Product"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFIRM DELETE MODAL
+// ════════════════════════════════════════════════════════════
+function ConfirmModal({ product, onConfirm, onCancel, loading }) {
+  return (
+    <div className="overlay">
+      <div className="modal confirm">
+        <div className="confirm-icon">🗑️</div>
+        <h3>Delete Product?</h3>
+        <p>
+          Are you sure you want to delete <strong>"{product.name}"</strong>?<br />
+          This action cannot be undone.
+        </p>
+        <div className="modal-actions" style={{ justifyContent: "center" }}>
+          <button className="btn btn-secondary" onClick={onCancel} disabled={loading}>Cancel</button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>
+            {loading ? "Deleting…" : "Yes, Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  LOGIN MODAL
+// ════════════════════════════════════════════════════════════
+function LoginModal({ onClose, onLogin }) {
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
+
+  const login = async () => {
+    if (!email || !password) return setError("Please enter email and password.");
+    setLoading(true);
+    setError("");
+    try {
+      const user = await sbLogin(email, password);
+      if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        await sbLogout();
+        throw new Error("Access denied. This panel is for admins only.");
+      }
+      onLogin(user);
+    } catch (e) {
+      setError(e.message);
+      setLoading(false);
+    }
+  };
+
+  const onKey = (e) => { if (e.key === "Enter") login(); };
+
+  return (
+    <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-title">🔐 Admin Login</div>
+        {error && <div className="err">{error}</div>}
+        <div className="form-group">
+          <label className="flabel">Email</label>
+          <input className="finput" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@example.com" onKeyDown={onKey} autoFocus />
+        </div>
+        <div className="form-group">
+          <label className="flabel">Password</label>
+          <input className="finput" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={onKey} />
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
+          <button className="btn btn-gold" onClick={login} disabled={loading}>
+            {loading ? "Logging in…" : "Login"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  ADMIN PANEL
+// ════════════════════════════════════════════════════════════
+function AdminPanel({ onLogout, onViewCatalog }) {
+  const [products, setProducts]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
+  const [showForm, setShowForm]       = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting]       = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await API.list();
+      setProducts(data || []);
+    } catch (e) {
+      setError("Failed to load products: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await API.remove(deleteTarget.id);
+      setDeleteTarget(null);
+      load();
+    } catch (e) {
+      setError("Delete failed: " + e.message);
+      setDeleting(false);
+    }
+  };
+
+  const openAdd  = () => { setEditProduct(null); setShowForm(true); };
+  const openEdit = (p) => { setEditProduct(p); setShowForm(true); };
+  const onSaved  = () => { setShowForm(false); setEditProduct(null); load(); };
+
+  const catBadgeClass = (cat) => {
+    if (cat === "Saree") return "badge badge-cat-saree";
+    if (cat === "Dress") return "badge badge-cat-dress";
+    return "badge badge-cat-other";
+  };
+
+  return (
+    <div className="adm-wrap">
+      <div className="adm-hdr">
+        <div>
+          <h2>Admin Dashboard</h2>
+          <p>{loading ? "Loading…" : `${products.length} product${products.length !== 1 ? "s" : ""}`}</p>
+        </div>
+        <div className="adm-actions">
+          <button className="btn btn-secondary" onClick={onViewCatalog}>← View Catalog</button>
+          <button className="btn btn-gold" onClick={openAdd}>+ Add Product</button>
+          <button className="btn btn-primary" onClick={onLogout}>Logout</button>
+        </div>
+      </div>
+
+      {error && <div className="err" style={{ marginBottom: "1rem" }}>{error}</div>}
+
+      <div className="tbl-wrap">
+        {loading ? (
+          <div className="loading"><div className="spinner" /></div>
+        ) : products.length === 0 ? (
+          <div className="tbl-empty">
+            <p style={{ marginBottom: "1rem", fontSize: "1.1rem" }}>No products yet.</p>
+            <button className="btn btn-gold" onClick={openAdd}>Add First Product</button>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id}>
+                  <td>
+                    {p.image_url
+                      ? <img className="tbl-img" src={p.image_url} alt={p.name} />
+                      : <div className="tbl-ph">{p.category === "Dress" ? "👗" : "🪡"}</div>
+                    }
+                  </td>
+                  <td style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", fontWeight: 500 }}>{p.name}</td>
+                  <td><span className={catBadgeClass(p.category)}>{p.category || "—"}</span></td>
+                  <td style={{ color: "var(--maroon)", fontWeight: 500 }}>₹{Number(p.price).toLocaleString("en-IN")}</td>
+                  <td><span className={`badge ${p.status === "Available" ? "badge-avail" : "badge-sold"}`}>{p.status}</span></td>
+                  <td>
+                    <div className="tbl-act">
+                      <button className="btn btn-secondary btn-sm" onClick={() => openEdit(p)}>✏️ Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteTarget(p)}>🗑️ Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showForm && (
+        <ProductFormModal
+          product={editProduct}
+          onClose={() => { setShowForm(false); setEditProduct(null); }}
+          onSaved={onSaved}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmModal
+          product={deleteTarget}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={deleting}
+        />
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  CATALOG VIEW
+// ════════════════════════════════════════════════════════════
+function CatalogView({ products, loading, error }) {
+  const [activeFilter, setActiveFilter] = useState("All");
+
+  const visibleProducts =
+    activeFilter === "All"
+      ? products
+      : products.filter((p) => p.category === activeFilter);
+
+  return (
+    <>
+      <div className="hero">
+        <div className="hero-inner">
+          <h1>Swamini <em>Collections</em></h1>
+          <div className="hero-line" />
+          <p className="hero-sub">Handpicked Sarees & Dresses · Timeless Elegance</p>
+        </div>
+      </div>
+
+      <div className="section-hd">
+        <h2>Our Collection</h2>
+        {!loading && !error && (
+          <p>
+            {visibleProducts.length}{" "}
+            {activeFilter === "All" ? "item" : activeFilter.toLowerCase()}
+            {visibleProducts.length !== 1 ? "s" : ""} · Direct from weaver to wardrobe
+          </p>
+        )}
+
+        {/* ── Filter buttons ── */}
+        {!loading && !error && products.length > 0 && (
+          <CategoryFilter
+            products={products}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+        )}
+      </div>
+
+      {loading ? (
+        <div className="loading">
+          <div className="spinner" />
+          <span>Loading collection…</span>
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <div style={{ fontSize: "2.5rem" }}>⚠️</div>
+          <p style={{ fontWeight: 500 }}>Unable to load products</p>
+          <p style={{ fontSize: ".82rem", color: "var(--text-muted)" }}>{error}</p>
+        </div>
+      ) : visibleProducts.length === 0 ? (
+        <div className="empty-state">
+          <div style={{ fontSize: "2.5rem" }}>{activeFilter === "Dress" ? "👗" : "🪡"}</div>
+          <p>No {activeFilter === "All" ? "products" : activeFilter.toLowerCase() + "s"} yet — check back soon!</p>
+          {activeFilter !== "All" && (
+            <button
+              className="btn btn-secondary"
+              style={{ marginTop: ".5rem" }}
+              onClick={() => setActiveFilter("All")}
+            >
+              Show all items
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid">
+          {visibleProducts.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ════════════════════════════════════════════════════════════
+//  🚀  ROOT APP
+// ════════════════════════════════════════════════════════════
+export default function App() {
+  const [view, setView]         = useState("catalog");
+  const [admin, setAdmin]       = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+
+  useEffect(() => {
+    const el = document.createElement("style");
+    el.textContent = GLOBAL_CSS;
+    document.head.appendChild(el);
+    return () => document.head.removeChild(el);
+  }, []);
+
+  const loadProducts = async () => {
+    if (!IS_CONFIGURED) { setLoading(false); return; }
+    setLoading(true);
+    setError("");
+    try {
+      const data = await API.list();
+      setProducts(data || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadProducts(); }, []);
+
+  const onLogin  = (user) => { setAdmin(user); setShowLogin(false); setView("admin"); };
+  const onLogout = async () => { await sbLogout(); setAdmin(null); setView("catalog"); loadProducts(); };
+
+  if (view === "admin" && admin) {
+    return (
+      <>
+        <header className="hdr">
+          <div className="hdr-brand">
+            <div className="hdr-name">Swamini Collections</div>
+            <div className="hdr-tag">Admin Panel</div>
+            <div className="hdr-author">author | Om Katkar</div>
+          </div>
+        </header>
+        <AdminPanel
+          onLogout={onLogout}
+          onViewCatalog={() => { setView("catalog"); loadProducts(); }}
+        />
+        <footer className="footer">
+          © {new Date().getFullYear()} Swamini Collections · All rights reserved.
+        </footer>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <header className="hdr">
+        <div className="hdr-brand">
+          <div className="hdr-name">Swamini Collections</div>
+          <div className="hdr-tag">Handpicked Sarees & Dresses</div>
+          <div className="hdr-author">author | Om Katkar</div>
+        </div>
+        <div className="hdr-right">
+          {admin
+            ? <button className="btn btn-gold" onClick={() => setView("admin")}>Admin Panel</button>
+            : <button className="btn btn-outline" onClick={() => setShowLogin(true)}>Admin Login</button>
+          }
+        </div>
+      </header>
+
+      <CatalogView products={products} loading={loading} error={error} />
+      <ContactSection />
+
+      <footer className="footer">
+        © {new Date().getFullYear()} Swamini Collections · All rights reserved.
+      </footer>
+
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={onLogin} />}
+    </>
+  );
+}
