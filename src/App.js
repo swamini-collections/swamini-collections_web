@@ -195,11 +195,13 @@ const GLOBAL_CSS = `
   .flabel { display: block; font-size: .73rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; margin-bottom: .35rem; }
   .finput, .fselect { width: 100%; padding: .62rem .85rem; border: 1.5px solid #DDD0BC; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text); background: var(--cream); transition: border-color .2s; outline: none; }
   .finput:focus, .fselect:focus { border-color: var(--gold); }
-  .upload-zone { border: 2px dashed #DDD0BC; border-radius: 8px; padding: 1.2rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--cream); }
+  .upload-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: 8px; margin-bottom: .7rem; display: block; border: 1px solid var(--cream-dark); }
+  .upload-btns { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .upload-zone { border: 2px dashed #DDD0BC; border-radius: 8px; padding: 1rem .6rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--cream); }
   .upload-zone:hover { border-color: var(--gold); background: #FBF5E0; }
-  .upload-preview { width: 100%; max-height: 155px; object-fit: cover; border-radius: 6px; margin-bottom: .5rem; display: block; }
-  .upload-text { font-size: .82rem; color: var(--text-muted); }
-  .upload-hint { font-size: .7rem; color: #bbb; margin-top: .2rem; }
+  .upload-zone-icon { font-size: 1.5rem; margin-bottom: .3rem; }
+  .upload-text { font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+  .upload-hint { font-size: .7rem; color: #bbb; margin-top: .5rem; text-align: center; }
   .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; justify-content: flex-end; }
   .err { background: #FDEEEC; color: var(--red); padding: .62rem .85rem; border-radius: 6px; font-size: .83rem; margin-bottom: 1rem; border: 1px solid #F5C8C2; }
 
@@ -462,7 +464,8 @@ function ProductFormModal({ product, onClose, onSaved }) {
   const [preview, setPreview]   = useState(product?.image_url || "");
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState("");
-  const fileRef = useRef();
+  const fileRef   = useRef();   // gallery picker
+  const cameraRef = useRef();   // direct camera capture
   const isEdit = !!product;
 
   const onFile = (e) => {
@@ -477,6 +480,9 @@ function ProductFormModal({ product, onClose, onSaved }) {
     setError("");
     setImgFile(f);
     setPreview(URL.createObjectURL(f));
+    // reset both inputs so selecting the same file again still fires onChange
+    if (fileRef.current) fileRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
   };
 
   const save = async () => {
@@ -540,15 +546,41 @@ function ProductFormModal({ product, onClose, onSaved }) {
 
         <div className="form-group">
           <label className="flabel">Product Image {!isEdit && "*"}</label>
-          <div className="upload-zone" onClick={() => fileRef.current?.click()}>
-            {preview
-              ? <img className="upload-preview" src={preview} alt="preview" />
-              : <div style={{ padding: "1rem 0", fontSize: "2rem" }}>📷</div>
-            }
-            <div className="upload-text">{preview ? "Click to change image" : "Click to upload image"}</div>
-            <div className="upload-hint">JPEG · PNG · WebP · HEIC — max 32 MB</div>
+
+          {preview && <img className="upload-preview" src={preview} alt="preview" />}
+
+          <div className="upload-btns">
+            <div className="upload-zone" onClick={() => fileRef.current?.click()}>
+              <div className="upload-zone-icon">🖼️</div>
+              <div className="upload-text">Choose from Gallery</div>
+            </div>
+            <div className="upload-zone" onClick={() => cameraRef.current?.click()}>
+              <div className="upload-zone-icon">📷</div>
+              <div className="upload-text">Take Photo</div>
+            </div>
           </div>
-          <input ref={fileRef} type="file" style={{ display: "none" }} onChange={onFile} />
+
+          <div className="upload-hint">JPEG · PNG · WebP · HEIC — max 32 MB</div>
+
+          {/* Gallery picker: opens the device's photo library / file browser */}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={onFile}
+          />
+
+          {/* Camera capture: capture="environment" opens the device camera directly
+              (rear camera) on mobile browsers instead of the gallery picker */}
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: "none" }}
+            onChange={onFile}
+          />
         </div>
 
         <div className="modal-actions">
